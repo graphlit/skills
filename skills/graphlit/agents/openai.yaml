@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graphlit"
+  short_description: "Build grounded chat, feeds, and retrieval with Graphlit"
+  default_prompt: "Use $graphlit to add Graphlit ingestion, feeds, explicit retrieval, collections, or streamAgent-based grounded chat to this project."

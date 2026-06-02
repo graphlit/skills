@@ -1,0 +1,27 @@
+{
+  "name": "graphlit-nextjs-streaming-chat",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "graphlit-client": "^1",
+    "next": "14",
+    "openai": "^5.23.2",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "dotenv": "^16",
+    "typescript": "^5"
+  }
+}
