@@ -29,9 +29,10 @@ If you do not already have a Graphlit project:
 1. Go to [Graphlit Studio](https://www.graphlit.dev) and create a free account.
 2. Create your organization.
 3. Create your first project.
-4. Open Graphlit Studio and select that project in the sidebar.
-5. Copy the project credentials to your clipboard from the selected project.
-6. Paste them into `.env.local`.
+4. Open Graphlit Studio and select that project in the sidebar so its project card is visible.
+5. Choose the target environment tab, usually `Preview` or `Production`.
+6. Click the copy button for `Copy Environment Variables`.
+7. Paste them into `.env.local`.
 
 You also need an `OPENAI_API_KEY`.
 
@@ -45,9 +46,10 @@ You also need an `OPENAI_API_KEY`.
 ## Where the Graphlit credentials come from
 
 1. Open Graphlit Studio.
-2. Select your project in the Studio sidebar.
-3. Copy the project credentials to your clipboard from the selected project in the sidebar.
-4. Paste those values into `.env.local`.
+2. Select your project in the Studio sidebar so its project card is visible.
+3. Choose the target environment tab, usually `Preview` or `Production`.
+4. Click the copy button for `Copy Environment Variables`.
+5. Paste those values into `.env.local`.
 
 `OPENAI_API_KEY` still comes from your OpenAI account.
 

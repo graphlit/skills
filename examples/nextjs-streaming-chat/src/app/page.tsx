@@ -329,18 +329,26 @@ export default function Page() {
                   <div className="list-row">
                     <div className="list-index">01</div>
                     <div className="list-copy">
-                      Select the target project in the Graphlit Studio sidebar.
+                      Select the target project in the Graphlit Studio sidebar
+                      so its project card is visible.
                     </div>
                   </div>
                   <div className="list-row">
                     <div className="list-index">02</div>
                     <div className="list-copy">
-                      Copy the project credentials to your clipboard from the
-                      selected project in the sidebar.
+                      Choose the target environment tab, usually{" "}
+                      <code>Preview</code> or <code>Production</code>.
                     </div>
                   </div>
                   <div className="list-row">
                     <div className="list-index">03</div>
+                    <div className="list-copy">
+                      Click the copy button for{" "}
+                      <code>Copy Environment Variables</code>.
+                    </div>
+                  </div>
+                  <div className="list-row">
+                    <div className="list-index">04</div>
                     <div className="list-copy">
                       Paste <code>GRAPHLIT_ORGANIZATION_ID</code>,{" "}
                       <code>GRAPHLIT_ENVIRONMENT_ID</code>, and{" "}
@@ -349,7 +357,7 @@ export default function Page() {
                     </div>
                   </div>
                   <div className="list-row">
-                    <div className="list-index">04</div>
+                    <div className="list-index">05</div>
                     <div className="list-copy">
                       Add <code>OPENAI_API_KEY</code> for the model runtime.
                     </div>

@@ -52,9 +52,10 @@ If this is a true first run:
 2. Create your account.
 3. Create your organization.
 4. Create your first project.
-5. Select that project in the Graphlit Studio sidebar.
-6. Copy the project credentials from the selected project.
-7. Paste them into `.env.local`.
+5. Select that project in the Graphlit Studio sidebar so its project card is visible.
+6. Choose the target environment tab, usually `Preview` or `Production`.
+7. Click the copy button for `Copy Environment Variables`.
+8. Paste the copied values into `.env.local`.
 
 You also need an `OPENAI_API_KEY` for the streaming example in this repo.
 

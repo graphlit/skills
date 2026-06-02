@@ -19,8 +19,9 @@ If the developer does not already have Graphlit credentials:
 2. Create an account.
 3. Create an organization.
 4. Create a project.
-5. Select that project in the Graphlit Studio sidebar.
-6. Copy the project credentials from the selected project.
+5. Select that project in the Graphlit Studio sidebar so its project card is visible.
+6. Choose the target environment tab, usually `Preview` or `Production`.
+7. Click the copy button for `Copy Environment Variables`.
 
 The Graphlit SDK needs these values:
 
@@ -125,6 +126,7 @@ Open `http://localhost:3000`.
 Usually means one of these:
 
 - credentials were copied from the wrong project
+- credentials were copied from the wrong environment tab
 - one of the three `GRAPHLIT_*` values is missing
 - `.env.local` was updated but the dev server was not restarted
 
