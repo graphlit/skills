@@ -2,64 +2,70 @@
 
 Build grounded chat, synced knowledge bases, and graph-aware applications with Graphlit.
 
-Graphlit is the context layer for AI applications and agents. This repo packages the Graphlit skill and a working example app around the modern Graphlit path:
+Graphlit is the context layer for AI applications and agents. This repo gives developers and coding agents the canonical Graphlit path: ingest or sync content, wait for processing, retrieve explicit evidence, and stream grounded answers with `streamAgent()`.
 
-- ingest or sync content first
-- wait for Graphlit to finish processing it
-- use `streamAgent()` as the streaming harness
-- keep retrieval explicit through a standalone tool
-- show the evidence in the UI
+[Use the Skill](skills/graphlit/SKILL.md) · [Run the Example](examples/nextjs-streaming-chat) · [Read the Docs](https://docs.graphlit.dev) · [Open Graphlit Studio](https://www.graphlit.dev)
 
-## Start Here
+## Why This Repo Exists
 
-1. Read [`skills/graphlit/SKILL.md`](skills/graphlit/SKILL.md).
-2. Run [`examples/nextjs-streaming-chat`](examples/nextjs-streaming-chat).
+When a developer asks an agent to "add Graphlit", the result should use Graphlit primitives instead of drifting into generic RAG scaffolding.
 
-## What This Repo Includes
+This repo provides:
 
-### Graphlit skill
+- a reusable `graphlit` skill that routes the agent to the right Graphlit references
+- a minimal Next.js example that proves the modern Graphlit app shape
+- task-specific implementation guides for ingestion, retrieval, collections, feeds, specifications, and knowledge graph workflows
 
-[`skills/graphlit/SKILL.md`](skills/graphlit/SKILL.md) is the routing layer.
+## What You Can Build
 
-It points developers to focused references for:
+- grounded chat over documents, websites, notes, transcripts, and synced external content
+- customer-scoped or workspace-scoped assistants using collections
+- continuously synced knowledge bases from Slack, Google Drive, email, RSS, S3, and web crawls
+- graph-aware applications that extract entities and relationships during ingest
 
-- Graphlit Studio setup
-- direct ingestion
-- retrieval
-- streaming chat
-- collections
-- specifications
-- feeds
-- knowledge graph workflows
+## Canonical Graphlit Path
 
-### Next.js example
+1. Verify credentials with `getProject()`.
+2. Ingest content with `ingestUri()` or sync a source with `createFeed()`.
+3. Wait for `isContentDone()` or `isFeedDone()` before retrieval depends on new content.
+4. Scope retrieval with a collection when the app has a clear dataset, tenant, customer, project, or workspace boundary.
+5. Use `streamAgent()` as the chat harness.
+6. Keep retrieval explicit through a standalone `retrieve_contents` tool backed by `retrieveSources()` and `lookupContents()`.
+7. Return and render visible sources in the UI.
 
-[`examples/nextjs-streaming-chat`](examples/nextjs-streaming-chat) is the canonical example in this repo.
+## What You Get In This Repo
 
-It shows:
+### `skills/graphlit/`
 
-- ingestion of a public website URL or public file URL
-- polling `isContentDone()` before retrieval
+The reusable Graphlit skill and its task-specific references. Start with [SKILL.md](skills/graphlit/SKILL.md) when the goal is to integrate Graphlit into an application or have a coding agent do it correctly.
+
+### `examples/nextjs-streaming-chat/`
+
+The canonical sample app for this repo. It shows:
+
+- URL ingestion with `ingestUri()`
+- readiness polling with `isContentDone()`
 - collection-scoped retrieval
 - `streamAgent()` with a standalone `retrieve_contents` tool
-- streamed answers with visible retrieved sources
+- streamed answers with visible sources
 
-## New to Graphlit?
+### `drafts/`
 
-If this is a true first run:
+Working drafts that can be adapted into docs, examples, or longer-form content later.
 
-1. Go to [Graphlit Studio](https://www.graphlit.dev).
-2. Create your account.
-3. Create your organization.
-4. Create your first project.
-5. Select that project in the Graphlit Studio sidebar so its project card is visible.
-6. Choose the target environment tab, usually `Preview` or `Production`.
-7. Click the copy button for `Copy Environment Variables`.
-8. Paste the copied values into `.env.local`.
+## Get Started
 
-You also need an `OPENAI_API_KEY` for the streaming example in this repo.
+### New to Graphlit?
 
-## Verify the Example
+1. Open [Graphlit Studio](https://www.graphlit.dev).
+2. Create your account, organization, and first project.
+3. Select that project so its project card is visible.
+4. Choose the target environment tab, usually `Preview` or `Production`.
+5. Click `Copy Environment Variables`.
+6. Paste the copied values into `.env.local`.
+7. Add `OPENAI_API_KEY` for the streaming example.
+
+### Run the Example
 
 ```bash
 cd examples/nextjs-streaming-chat
@@ -69,28 +75,22 @@ npm run check
 npm run dev
 ```
 
-## What Success Looks Like
+Open `http://localhost:3000`.
+
+## Success Looks Like
 
 - the app connects to the intended Graphlit project
-- the app ingests a URL and waits for `isContentDone()`
+- a URL ingests successfully
+- retrieval waits for content readiness
 - the agent calls `retrieve_contents`
 - the answer streams incrementally
 - the UI shows the supporting sources
 
-## Repo Layout
+## Design Principles
 
-- `skills/graphlit/`
-  The reusable Graphlit skill, references, and agent metadata.
-- `examples/nextjs-streaming-chat/`
-  The canonical Next.js implementation.
+- prefer Graphlit SDK primitives over generic RAG stacks
+- keep retrieval explicit and inspectable
+- do not rely on newly ingested or newly synced content until Graphlit says it is ready
+- keep examples small enough to copy into real apps quickly
 
-## Design Rules
-
-This repo is intentionally opinionated:
-
-- `streamAgent()` is the default chat harness
-- retrieval stays explicit through `retrieve_contents`
-- ingestion is incomplete until Graphlit says it is ready
-- examples stay small enough to copy into a real app quickly
-
-The goal is to make Graphlit feel easier to adopt without hiding how Graphlit actually works.
+The goal is to make Graphlit easy to adopt without hiding how Graphlit actually works.
