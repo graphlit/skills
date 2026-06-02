@@ -2,7 +2,7 @@
 
 Build grounded chat, synced knowledge bases, and graph-aware applications with Graphlit.
 
-Graphlit is the context layer for AI applications and agents. This repo packages the Graphlit skill, a working example app, and supporting drafts around the modern Graphlit path:
+Graphlit is the context layer for AI applications and agents. This repo packages the Graphlit skill and a working example app around the modern Graphlit path:
 
 - ingest or sync content first
 - wait for Graphlit to finish processing it
@@ -14,7 +14,6 @@ Graphlit is the context layer for AI applications and agents. This repo packages
 
 1. Read [`skills/graphlit/SKILL.md`](skills/graphlit/SKILL.md).
 2. Run [`examples/nextjs-streaming-chat`](examples/nextjs-streaming-chat).
-3. Reuse [`drafts/graphlit-streamagent-retrieval-chat.md`](drafts/graphlit-streamagent-retrieval-chat.md) as the first draft for longer-form content.
 
 ## What This Repo Includes
 
@@ -44,10 +43,6 @@ It shows:
 - collection-scoped retrieval
 - `streamAgent()` with a standalone `retrieve_contents` tool
 - streamed answers with visible retrieved sources
-
-### Draft content
-
-[`drafts/`](drafts/) holds working drafts that can move into product docs, blogs, or example repos later.
 
 ## New to Graphlit?
 
@@ -87,8 +82,6 @@ npm run dev
   The reusable Graphlit skill, references, and agent metadata.
 - `examples/nextjs-streaming-chat/`
   The canonical Next.js implementation.
-- `drafts/`
-  Draft long-form content for later adaptation.
 
 ## Design Rules
 
