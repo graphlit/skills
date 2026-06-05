@@ -13,6 +13,7 @@ When a developer asks an agent to "add Graphlit", the result should use Graphlit
 This repo provides:
 
 - a reusable `graphlit` skill that routes the agent to the right Graphlit references
+- a reusable `durable-cli` skill that teaches coding agents how to install, authenticate, and operate Durable Agents from the terminal
 - a minimal Next.js example that proves the modern Graphlit app shape
 - task-specific implementation guides for ingestion, retrieval, collections, feeds, specifications, and knowledge graph workflows
 
@@ -38,6 +39,10 @@ This repo provides:
 ### `skills/graphlit/`
 
 The reusable Graphlit skill and its task-specific references. Start with [SKILL.md](skills/graphlit/SKILL.md) when the goal is to integrate Graphlit into an application or have a coding agent do it correctly.
+
+### `skills/durable-cli/`
+
+The reusable Durable CLI skill and its walkthrough references. Start with [SKILL.md](skills/durable-cli/SKILL.md) when the goal is to install, authenticate, script, or operate Durable Agents from a terminal without drifting into outdated command aliases.
 
 ### `examples/nextjs-streaming-chat/`
 
