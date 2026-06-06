@@ -54,10 +54,6 @@ The canonical sample app for this repo. It shows:
 - `streamAgent()` with a standalone `retrieve_contents` tool
 - streamed answers with visible sources
 
-### `drafts/`
-
-Working drafts that can be adapted into docs, examples, or longer-form content later.
-
 ## Get Started
 
 ### New to Graphlit?
