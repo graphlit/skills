@@ -118,7 +118,7 @@ durable library search graphlit --path /research
 Start a run against the created agent:
 
 ```bash
-durable runs start "$AGENT_ID" \
+durable agents start "$AGENT_ID" \
   --prompt "Summarize the sprint notes and the README."
 ```
 
@@ -185,7 +185,7 @@ durable connectors list
 - `durable whoami` and `durable status` complete without auth errors
 - the persona and agent are created successfully
 - Library content appears through both `durable library list` and `durable ls /library`
-- `durable runs start` streams a usable response
+- `durable agents start` streams a usable response
 - `durable channels create slack` or another provider create command stores a channel configuration
 
 ## Common First-Run Issues

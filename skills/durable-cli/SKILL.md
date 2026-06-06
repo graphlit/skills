@@ -56,7 +56,7 @@ Load the reference that matches the developer task:
 | **API key** | The Durable credential used by the CLI after `durable login` or `durable auth import`. |
 | **Persona** | Instructional behavior that can be attached to an agent. |
 | **Agent** | The Durable object that owns execution behavior, model choice, and persona attachment. |
-| **Run** | One execution of an agent started through `durable runs start`. |
+| **Run** | One execution of an agent started through `durable agents start`. |
 | **Library** | Durable content objects managed through `durable library ...`. |
 | **GraphlitFs** | The read-only virtual filesystem mounted at `/library`, exposed through `ls`, `cat`, `grep`, `find`, and `inspect`. |
 | **MCP connector** | An external MCP server connection managed through the top-level `durable connectors ...` group. |
@@ -76,13 +76,13 @@ Load the reference that matches the developer task:
 4. Create a persona if the agent needs explicit instructions.
 5. Create an agent.
 6. Load context with `durable library ingest` or `durable library upload`.
-7. Start a run with `durable runs start`.
+7. Start a run with `durable agents start`.
 8. Use `durable --json` when another tool or script needs machine-readable output.
 
 ## Agent Behavior
 
 - Prefer the exact current Durable CLI syntax over historical or speculative aliases.
-- Use `durable runs start`, not a root `durable run` shortcut.
+- Use `durable agents start`, not `durable runs start` or a root `durable run` shortcut.
 - Use `durable library ingest` for URL or text input and `durable library upload` for local files.
 - Use `durable channels create ...`, `durable channels list`, and `durable channels delete` for channel providers.
 - Reserve top-level `durable connectors ...` for MCP connectors, not channel providers.
@@ -91,7 +91,7 @@ Load the reference that matches the developer task:
 
 ## Rules
 
-- Do not invent Durable CLI aliases such as `durable run`, `durable resume`, `durable library add`, or `durable channels connectors ...`.
+- Do not invent or reuse removed Durable CLI aliases such as `durable run`, `durable runs start`, `durable resume`, `durable library add`, or `durable channels connectors ...`.
 - Do not treat `/library` VFS commands as local filesystem commands; they only operate on Durable Library content.
 - For Library ingest, use exactly one of `--url` or `--text`.
 - Use GUIDs captured from `--json` output for object-specific automation when precision matters.

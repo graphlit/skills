@@ -32,11 +32,11 @@ Use grouped commands for execution:
 durable agents list
 durable agents create
 durable agents get
+durable agents start
 durable agents update
 durable agents delete
 
 durable runs list
-durable runs start
 durable runs get
 durable runs events
 durable runs watch
@@ -48,7 +48,7 @@ durable runs cancel
 
 Important:
 
-- do not use older root aliases such as `durable run` or `durable resume`
+- do not use older or removed execution aliases such as `durable run`, `durable runs start`, or `durable resume`
 
 ## Library vs VFS
 
@@ -152,7 +152,8 @@ AGENT_ID="$(
 
 If you see one of these, rewrite it:
 
-- `durable run` -> `durable runs start`
+- `durable run` -> `durable agents start`
+- `durable runs start` -> `durable agents start`
 - `durable resume` -> `durable runs resume`
 - `durable library add` -> `durable library ingest` or `durable library upload`
 - `durable channels connectors create slack` -> `durable channels create slack`
