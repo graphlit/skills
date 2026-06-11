@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graphlit Agent Tools"
+  short_description: "Use @graphlit/agent-tools with streamAgent"
+  default_prompt: "Use $graphlit-agent-tools to add @graphlit/agent-tools retrieval, web search, URL ingestion, and content inspection tools to a TypeScript streamAgent app."

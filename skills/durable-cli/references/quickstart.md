@@ -62,12 +62,14 @@ durable accounts list
 
 By default, the CLI opens a browser. If the terminal cannot open one, use `--no-browser` to print the authorization URL, finish the provider flow in the browser, then return to the terminal and verify the account through `durable accounts list` or `durable accounts get`.
 
+For GitHub, the browser handoff may include installing or updating the Durable GitHub App. Treat that as the normal path for private repository access: Durable can only enumerate and read repositories that the app installation grants.
+
 `web` and several direct-auth sources do not require an account. `web` is the simplest example:
 
 ```bash
 durable sources create web \
-  --name "Graphlit Docs Web" \
-  --url "https://docs.graphlit.dev"
+  --name "Docs Web" \
+  --url "https://example.com/docs"
 
 durable sources list --provider web
 ```
@@ -99,6 +101,14 @@ durable sources discover github \
   --search repo-name
 ```
 
+After discovery, create the exact repository-backed source type you need:
+
+```bash
+durable sources create github-code \
+  --account <account-email-or-id> \
+  --repo owner/repo
+```
+
 ## 5. Create a Persona and Agent
 
 For the cleanest scripted path, create the persona first and capture its ID:
@@ -127,8 +137,25 @@ AGENT_ID="$(
 durable agents get "$AGENT_ID"
 ```
 
+Edit agent properties with the canonical property grammar:
+
+```bash
+durable agents set "$AGENT_ID" prompt "Answer from the Library context."
+durable agents set "$AGENT_ID" prompt --file ./agent-prompt.md
+durable agents set "$AGENT_ID" focus "Only use content tagged planning."
+durable agents clear "$AGENT_ID" focus
+```
+
+Scalar values are positional. List-valued properties use repeated positional
+values:
+
+```bash
+durable agents set "$AGENT_ID" trigger.kinds text page
+durable agents set "$AGENT_ID" heartbeat.active_days 1 2 3 4 5
+```
+
 If the workflow needs automation instead of a purely interactive agent, use the
-same create surface with explicit schedule or heartbeat flags:
+same create surface with explicit schedule, heartbeat, or content-trigger flags:
 
 ```bash
 durable agents create \
@@ -138,8 +165,15 @@ durable agents create \
 
 durable agents create \
   --name "Inbox Watcher" \
-  --heartbeat-every 15m \
+  --mode heartbeat \
+  --every 15m \
   --timezone America/Los_Angeles
+
+durable agents create \
+  --name "Content Triage" \
+  --mode triggered \
+  --prompt "Summarize newly finished content and flag items that need attention." \
+  --kind email
 ```
 
 ## 6. Add Library Content
@@ -148,15 +182,13 @@ Use `ingest` for URL or text input:
 
 ```bash
 durable library ingest \
-  --url "https://docs.graphlit.dev" \
-  --name "Graphlit Docs Home" \
-  --path /research \
-  --label graphlit
+  --url "https://example.com/docs" \
+  --name "Docs Home" \
+  --label docs
 
 durable library ingest \
   --text "Sprint notes: focus on onboarding, channels, and CLI polish." \
   --name "Sprint Notes" \
-  --path /notes \
   --label planning
 ```
 
@@ -165,16 +197,20 @@ Use `upload` for local files:
 ```bash
 durable library upload \
   ./README.md \
-  --path /project \
   --label repo \
   --wait
 ```
 
+If the workspace already has a Graphlit collection, attach content with
+`--collection <collection-ref>`.
+
 Browse or search the Library:
 
 ```bash
-durable library list --path /project
-durable library search graphlit --path /research
+durable library list --label docs
+durable library search docs --label docs
+durable fs find /library/labels/docs
+durable fs ls /library/kind
 ```
 
 ## 7. Run an Agent
@@ -210,21 +246,24 @@ durable agents start "$AGENT_ID" \
 
 ## 8. Inspect `/library` Through VFS Commands
 
-Durable exposes a shell-style read-only VFS for Library content. These commands are top-level by design:
+Durable exposes a shell-style read-only VFS for Library content under the `durable fs` namespace:
 
 ```bash
-durable ls /library
-durable ls /library/project --long
-durable find /library --name README --long
-durable grep graphlit /library
-durable cat /library/project/<content-id>
-durable inspect /library/project/<content-id>
+durable fs ls /library
+durable fs ls /library/labels/docs --long
+durable fs find /library --kind markdown --long
+durable fs grep docs /library/labels/docs
+durable fs sgrep "semantic topic" /library/labels/docs
+durable fs cat /library/<content-id>
+durable fs stat /library/<content-id>
+durable library inspect <content-id>
 ```
 
 Important distinction:
 
 - `durable library ...` manages Durable content objects
-- `durable ls/cat/grep/find/inspect` reads the virtual filesystem view under `/library`
+- `durable library inspect <content-id>` prints a Markdown full-content inspection by content ID
+- `durable fs ls/cat/grep/sgrep/find/stat` reads the virtual filesystem view under `/library`
 
 ## 9. Configure Channels
 
@@ -239,7 +278,7 @@ durable channels create slack \
   --app-id "<slack-app-id>"
 
 durable channels list
-durable channels endpoints --provider slack
+durable channels endpoints --provider slack --query ops
 durable channels bind \
   --provider slack \
   --agent "$AGENT_ID" \
@@ -249,12 +288,27 @@ durable channels bind \
 
 Other BYO chat providers follow the same `durable channels create <provider>` pattern with provider-specific flags.
 
-## 10. MCP Connectors Stay Separate
-
-Do not use `durable channels ...` for MCP servers. MCP connectors have their own top-level group:
+Durable-hosted email and messaging setup live under the same `channels` group:
 
 ```bash
-durable connectors create https://example.com/mcp --name "Internal MCP" --type http
+durable channels email create --username support
+durable channels email messages list support@durableagents.ai
+durable channels email messages send support@durableagents.ai \
+  --to user@example.com \
+  --subject "Hello" \
+  --text "READY"
+
+durable channels messaging status
+durable channels messaging phones register --phone +15555550123
+durable channels messaging phones list
+```
+
+## 10. Configure MCP Connectors
+
+MCP servers use their own top-level connector group:
+
+```bash
+durable connectors create https://example.com/mcp --name "Example MCP" --type http
 durable connectors list
 ```
 
@@ -262,8 +316,9 @@ durable connectors list
 
 - `durable whoami` and `durable status` complete without auth errors
 - `durable accounts connect` or `durable sources create web` succeeds when the workflow needs synced external content
+- GitHub account setup includes the app installation/update needed for selected private repositories
 - the persona and agent are created successfully
-- Library content appears through both `durable library list` and `durable ls /library`
+- Library content appears through both `durable library list` and `durable fs ls /library`
 - `durable agents start` streams a usable response
 - `durable runs prompt` can add a follow-up turn to an interactive run
 - `durable channels create slack` or another provider create command stores a channel configuration
@@ -275,7 +330,7 @@ durable connectors list
 Usually means:
 
 - `durable login` never completed the browser pairing flow
-- the stored credential was removed locally
+- the local credential file is missing
 - `DURABLE_API_KEY` is set in the environment and is overriding the stored file credential
 
 ### `durable library ingest` fails immediately
@@ -293,6 +348,7 @@ Usually means:
 - the provider OAuth flow was never completed in the browser
 - the CLI could not open a browser and `--no-browser` was not used
 - the account needs to be re-authorized and should use `durable accounts reconnect`
+- for GitHub, the app installation was not completed or does not include the repository the user expects
 
 ### `durable sources create` fails on a provider-backed source
 
@@ -309,14 +365,13 @@ Usually means:
 - the file path does not exist
 - the file extension does not map to a supported MIME type
 
-### VFS commands do not read local files
+### VFS commands read Durable Library content
 
-This is expected. `durable ls`, `cat`, `grep`, `find`, and `inspect` operate on the Durable `/library` VFS, not the local filesystem.
+This is expected. `durable fs ls`, `cat`, `grep`, `sgrep`, `find`, and `stat` operate on the Durable `/library` VFS.
 
 ### Channel creation fails
 
 Usually means:
 
 - required provider secrets were not passed
-- the relevant `DURABLE_*` environment variables were missing
 - the provider itself still needs manual app-side setup after the Durable-side configuration step

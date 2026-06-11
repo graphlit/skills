@@ -1,6 +1,6 @@
 # Command Surface
 
-Use this reference when the developer needs the right Durable CLI command family and naming pattern, especially after older aliases or draft docs have changed.
+Use this reference when the developer needs the right Durable CLI command family and naming pattern.
 
 ## Current Naming Rules
 
@@ -11,9 +11,9 @@ Use this reference when the developer needs the right Durable CLI command family
 - `reconnect` is for re-authorizing an existing source account
 - `discover` is for resolving provider resources before creating a data source
 - `bind` and `unbind` are for attaching agents to channel endpoints
-- `ls`, `cat`, `grep`, `find`, and `inspect` are intentional shell-style VFS affordances
+- `durable fs ls`, `cat`, `grep`, `sgrep`, `find`, and `stat` are intentional shell-style VFS affordances
 
-## Root Auth Commands
+## Auth, Keys, Models, And Usage
 
 Use these for sign-in and credential visibility:
 
@@ -24,6 +24,11 @@ durable whoami
 durable status
 durable auth import
 durable auth export
+durable keys list
+durable keys create
+durable keys revoke
+durable models list
+durable usage
 ```
 
 ## Agents and Runs
@@ -34,6 +39,8 @@ Use grouped commands for execution:
 durable agents list
 durable agents create
 durable agents get
+durable agents set
+durable agents clear
 durable agents start
 durable agents update
 durable agents delete
@@ -51,12 +58,52 @@ durable runs cancel
 
 Important:
 
-- do not use older or removed execution aliases such as `durable run`, `durable runs start`, or `durable resume`
 - use positional prompt text, `--file`, or stdin for `durable agents start` and `durable runs prompt`
-- use `durable agents create/update --cron --timezone` for scheduled agents
-- use `durable agents create/update --heartbeat-every --timezone` for heartbeat agents
+- use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` for canonical agent mutation
+- use `durable agents set <agent> schedule.cron "0 7 * * 1-5"` and `durable agents set <agent> schedule.timezone America/Los_Angeles` for scheduled agents
+- use `durable agents set <agent> heartbeat.frequency_minutes 30` for heartbeat agents
+- use `durable agents set <agent> trigger.kinds text page` for content-triggered agents
 - use `durable agents update --state enabled|disabled` for explicit lifecycle toggles
+- treat `durable agents update ...` as an older compatibility surface for simple field edits and create-time automation flags
 - use `durable agents start --wait --timeout <duration>` and `durable runs prompt --wait --timeout <duration>` for scripted run control
+
+Property mutation examples:
+
+```bash
+durable agents set <agent> prompt "Run the daily account sweep."
+durable agents set <agent> prompt --file ./prompt.md
+durable agents set <agent> focus "Only use Q4 customer content."
+durable agents set <agent> trigger.kinds text page
+durable agents clear <agent> focus
+durable agents set <agent> mode interactive
+```
+
+Scalar values are positional by default. List properties use repeated
+positional values. The global `--json` flag is output-only, not a JSON input
+parser.
+
+## Personas And Skills
+
+Use these for reusable agent behavior:
+
+```bash
+durable personas list
+durable personas create
+durable personas get
+durable personas update
+durable personas delete
+
+durable skills list
+durable skills create
+durable skills get
+durable skills update
+durable skills delete
+```
+
+Important:
+
+- use `durable personas create/update --file <path>` when instructions are easier to maintain in a local file
+- use `durable skills create/update --text ...` or `--file <path>` for reusable skill instructions
 
 ## Library vs VFS
 
@@ -71,6 +118,7 @@ durable library list
 durable library ingest
 durable library upload
 durable library get
+durable library inspect
 durable library update
 durable library delete
 durable library search
@@ -81,17 +129,21 @@ durable library search
 Use these when reading the `/library` virtual filesystem:
 
 ```bash
-durable ls
-durable cat
-durable grep
-durable find
-durable inspect
+durable fs ls
+durable fs cat
+durable fs grep
+durable fs sgrep
+durable fs find
+durable fs stat
 ```
 
 Important:
 
-- do not reintroduce `durable library add`
-- do not move VFS commands under `library` in examples or automation
+- keep `durable library ...` for content management
+- use `durable library inspect <content-id>` for Markdown-formatted full content inspection by content ID
+- use `durable fs ...` for reading the `/library` filesystem view by VFS path
+- use `durable fs grep` for keyword/lexical Graphlit content search
+- use `durable fs sgrep` for semantic/hybrid Graphlit content search
 
 ## Source Accounts and Data Sources
 
@@ -113,6 +165,7 @@ Important:
 
 - `durable accounts connect` opens a browser by default and can print the authorization URL with `--no-browser`
 - the browser completes the provider OAuth flow and then returns the user to the terminal
+- GitHub account connection may include a GitHub App install/update step; that app installation controls which private repositories Durable can enumerate and read
 - use `durable accounts ...`, not `durable connectors ...`, for GitHub, Google, Microsoft, Slack, Notion, and other source accounts
 
 ### Data sources
@@ -177,12 +230,21 @@ durable channels unbind
 durable channels email list
 durable channels email create
 durable channels email delete
+durable channels email messages list
+durable channels email messages get
+durable channels email messages send
+durable channels messaging status
+durable channels messaging phones register
+durable channels messaging phones list
+durable channels messaging phones delete
 ```
 
 Important:
 
-- do not use the outdated `durable channels connectors ...` form
-- do not use `durable connectors create --provider slack` for channel providers
+- use `durable channels ...` for channel providers
+- use `durable connectors ...` for MCP servers
+- use `durable channels endpoints --query ...` to narrow bindable destinations
+- use `durable channels bind --type ...` or `unbind --type ...` only when the endpoint type needs an explicit override
 
 ## Output Modes
 
@@ -202,17 +264,14 @@ AGENT_ID="$(
 )"
 ```
 
-## Common Corrections
+## Verify Before Scripting
 
-If you see one of these, rewrite it:
+When command details matter, prefer the live help output before producing automation:
 
-- `durable run` -> `durable agents start`
-- `durable runs start` -> `durable agents start`
-- `durable runs continue` -> `durable runs prompt`
-- `durable connectors connect github` -> `durable accounts connect github`
-- `durable connectors connect google` -> `durable accounts connect google`
-- `durable data-sources ...` -> `durable sources ...`
-- `durable resume` -> `durable runs resume`
-- `durable library add` -> `durable library ingest` or `durable library upload`
-- `durable channels connectors create slack` -> `durable channels create slack`
-- `durable connector ...` -> `durable connectors ...`
+```bash
+durable --help
+durable agents start --help
+durable runs prompt --help
+durable sources create --help
+durable channels bind --help
+```

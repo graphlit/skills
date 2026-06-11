@@ -42,7 +42,7 @@ The reusable Graphlit skill and its task-specific references. Start with [SKILL.
 
 ### `skills/durable-cli/`
 
-The reusable Durable CLI skill and its walkthrough references. Start with [SKILL.md](skills/durable-cli/SKILL.md) when the goal is to install, authenticate, connect source accounts, manage data sources, script, or operate Durable Agents from a terminal without drifting into outdated command aliases.
+The reusable Durable CLI skill and its walkthrough references. Start with [SKILL.md](skills/durable-cli/SKILL.md) when the goal is to install, authenticate, connect source accounts, manage data sources, script, or operate Durable Agents from a terminal using the current command surface.
 
 ### `examples/nextjs-streaming-chat/`
 
