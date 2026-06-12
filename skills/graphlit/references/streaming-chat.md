@@ -84,6 +84,8 @@ const systemPrompt = [
 
 This is the core pattern used in the example app:
 
+The `specificationId` should reference a `SpecificationTypes.Agentic` specification. Use Completion specifications for `promptConversation()` style calls, not for this `streamAgent()` path.
+
 ```typescript
 import OpenAI from "openai";
 import { Graphlit, Types, type AgentStreamEvent } from "graphlit-client";
@@ -159,7 +161,7 @@ await client.streamAgent(
 Important pieces:
 
 - provider client is attached before streaming
-- specification is explicit
+- specification is explicit and points to an Agentic spec
 - tools and handlers are passed directly into `streamAgent()`
 - the callback maps agent events into UI-safe events
 
@@ -188,6 +190,10 @@ That is enough for a good developer-facing demo:
 - the UI shows retrieved sources alongside the answer
 
 ## Common Mistakes
+
+### Using a completion specification
+
+`streamAgent()` should use a `SpecificationTypes.Agentic` specification. Completion specifications are for `promptConversation()` and related non-agent conversation calls.
 
 ### Treating `streamAgent()` as the retrieval layer
 

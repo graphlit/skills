@@ -1,4 +1,4 @@
 interface:
   display_name: "Graphlit Agent Tools"
-  short_description: "Give agents Graphlit retrieval tools"
-  default_prompt: "Use $graphlit-agent-tools to give my agent Graphlit retrieval and source tools in my agent framework."
+  short_description: "Give agents Graphlit retrieval, resource, mutation, enrichment, and generation tools"
+  default_prompt: "Use $graphlit-agent-tools to give my agent the right @graphlit/agent-tools factories for Graphlit retrieval, resource reading, mutation, enrichment, and media generation."

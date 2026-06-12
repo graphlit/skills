@@ -5,7 +5,8 @@ Use this reference when the developer needs to choose, create, or reuse Graphlit
 ## On This Page
 
 - what specifications control
-- completion specifications for `streamAgent()`
+- agentic specifications for `streamAgent()`
+- completion specifications for `promptConversation()`
 - extraction specifications for workflows
 - reusing existing specifications
 - provider setup and good defaults
@@ -16,10 +17,11 @@ A specification is a reusable model configuration.
 
 For most Graphlit integrations, specifications matter in two places:
 
-- **completion specifications** for chat and answer generation
+- **agentic specifications** for `streamAgent()`, tool calling, and streamed agent runs
+- **completion specifications** for `promptConversation()` and other non-agent conversation calls
 - **extraction specifications** for workflows such as knowledge graph extraction
 
-## Completion Specification for `streamAgent()`
+## Agentic Specification for `streamAgent()`
 
 This is the most common public pattern:
 
@@ -28,10 +30,24 @@ import { Graphlit, Types } from "graphlit-client";
 
 const client = new Graphlit();
 
-const created = await client.createSpecification({
-  name: "Graphlit Grounded Chat",
-  type: Types.SpecificationTypes.Completion,
+const systemPrompt = [
+  "You are a grounded assistant over a Graphlit knowledge base.",
+  "Use the provided retrieval tools before answering questions that depend on project content.",
+  "If retrieval returns weak or empty evidence, say so plainly.",
+  "Cite document names naturally in the answer.",
+].join(" ");
+
+const upserted = await client.upsertSpecification({
+  name: "Graphlit Grounded Agent",
+  type: Types.SpecificationTypes.Agentic,
   serviceType: Types.ModelServiceTypes.OpenAi,
+  systemPrompt,
+  searchType: Types.ConversationSearchTypes.None,
+  strategy: {
+    enableSummarization: true,
+    enableEntityExtraction: true,
+    enableFactExtraction: false,
+  },
   openAI: {
     model: Types.OpenAiModels.Gpt4O_128K,
     temperature: 0.2,
@@ -39,7 +55,7 @@ const created = await client.createSpecification({
   },
 });
 
-const specificationId = created.createSpecification?.id;
+const specificationId = upserted.upsertSpecification?.id;
 ```
 
 Use the resulting specification with `streamAgent()`:
@@ -57,23 +73,28 @@ await client.streamAgent(
 
 Good defaults for grounded chat:
 
+- `SpecificationTypes.Agentic`
+- `searchType: ConversationSearchTypes.None` when retrieval is handled explicitly through tools
 - low temperature
 - moderate response token limit
+- one clear system prompt
 - one clear provider
-- reuse the same specification across the app
+- upsert/reuse the same specification across the app
+
+Use `SpecificationTypes.Completion` for `promptConversation()` style calls. Do not use Completion specs for `streamAgent()` tool-calling runs.
 
 ## Reuse Before Creating
 
 If the app runs often, query for an existing specification first:
 
 ```typescript
-async function ensureCompletionSpecification(
+async function ensureAgenticSpecification(
   client: Graphlit,
   name: string,
 ): Promise<string> {
   const existing = await client.querySpecifications({
     search: name,
-    types: [Types.SpecificationTypes.Completion],
+    types: [Types.SpecificationTypes.Agentic],
   });
 
   const match =
@@ -84,10 +105,24 @@ async function ensureCompletionSpecification(
     return match.id;
   }
 
-  const created = await client.createSpecification({
+  const systemPrompt = [
+    "You are a grounded assistant over a Graphlit knowledge base.",
+    "Use the provided retrieval tools before answering questions that depend on project content.",
+    "If retrieval returns weak or empty evidence, say so plainly.",
+    "Cite document names naturally in the answer.",
+  ].join(" ");
+
+  const upserted = await client.upsertSpecification({
     name,
-    type: Types.SpecificationTypes.Completion,
+    type: Types.SpecificationTypes.Agentic,
     serviceType: Types.ModelServiceTypes.OpenAi,
+    systemPrompt,
+    searchType: Types.ConversationSearchTypes.None,
+    strategy: {
+      enableSummarization: true,
+      enableEntityExtraction: true,
+      enableFactExtraction: false,
+    },
     openAI: {
       model: Types.OpenAiModels.Gpt4O_128K,
       temperature: 0.2,
@@ -95,12 +130,12 @@ async function ensureCompletionSpecification(
     },
   });
 
-  const createdId = created.createSpecification?.id;
-  if (!createdId) {
-    throw new Error(`Failed to create specification: ${name}`);
+  const upsertedId = upserted.upsertSpecification?.id;
+  if (!upsertedId) {
+    throw new Error(`Failed to upsert specification: ${name}`);
   }
 
-  return createdId;
+  return upsertedId;
 }
 ```
 
@@ -170,10 +205,16 @@ If the developer switches providers, update both:
 
 ### Grounded chat
 
-- `SpecificationTypes.Completion`
+- `SpecificationTypes.Agentic`
 - one shared spec per app
+- explicit system prompt
 - low temperature
 - explicit token limit
+
+### Prompt conversation
+
+- `SpecificationTypes.Completion`
+- use this for `promptConversation()`/`completeConversation()` paths, not `streamAgent()`
 
 ### Entity extraction
 
@@ -182,6 +223,10 @@ If the developer switches providers, update both:
 - explicit extracted entity types
 
 ## Common Mistakes
+
+### Using a completion spec for `streamAgent()`
+
+`streamAgent()` is the agent/tool-calling path, so use `SpecificationTypes.Agentic`. Completion specs are for `promptConversation()` and related conversation-completion calls.
 
 ### Using a completion spec for extraction
 
