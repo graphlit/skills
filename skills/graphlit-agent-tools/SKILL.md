@@ -13,7 +13,7 @@ This skill is for application developers using the package. It is not for buildi
 
 - Retrieval over Graphlit-ingested documents, emails, events, messages, pages, posts, memories, and files.
 - Resource-shaped URIs such as `contents://...`, `collections://...`, `feeds://...`, `facts://...`, `conversations://...`, and `entities://...`, plus package-native `list_resources` and `read_resource` tools to dereference them.
-- Web search, URL/text/link ingestion, page screenshots, web mapping, and one-time or scheduled web crawl feeds.
+- Web search, non-ingesting page inspection, URL/text/link ingestion, page screenshots, web mapping, and one-time or scheduled web crawl feeds.
 - Content and feed readiness polling so newly ingested or synced sources are not used too early.
 - Collection, label, memory, enrichment, and media generation tools that apps can expose intentionally.
 - Explicit app-level control over which Graphlit abilities the agent has.
@@ -165,6 +165,7 @@ Prefer `retrieve_contents` plus `inspect_content` as the default RAG pair for gr
 | `createQueryCollectionsTool()` | `query_collections` | The agent needs to list collections. |
 | `createQueryFeedsTool()` | `query_feeds` | The agent needs to list feeds. |
 | `createWebSearchTool()` | `web_search` | The agent needs current public web leads. Results are not ingested. |
+| `createInspectPageTool()` | `inspect_page` | The agent needs Markdown text from one public URL without ingesting it into Graphlit. |
 | `createWebMapTool()` | `web_map` | The agent needs discovered URLs from a public website without ingestion. |
 
 ### Mutating Graphlit Tools
@@ -302,6 +303,6 @@ Avoid examples that require a hard-coded collection ID unless the surrounding ap
 - Choose explicit Graphlit tools in the application. Do not add package-level bundle helpers, tool discovery, meta-tools, or a new router around this package.
 - Do not copy built-in MCP server scope, approval, profile, agent, view, or UI behavior into app-level usage.
 - Do not expose `platform__list_resources` or `platform__read_resource`; use package-native `list_resources` and `read_resource` when generic Graphlit resource reading is useful.
-- Do not treat `web_search` results as ingested evidence. Ingest or inspect URLs before relying on answer-critical facts.
+- Do not treat `web_search` results as ingested evidence. Use `inspect_page` for transient page text or ingest URLs before relying on answer-critical facts.
 - Wait for newly ingested content before expecting retrieval to find it.
 - Keep system guidance short: call retrieval before grounded answers, inspect important sources, and be honest about weak evidence.
