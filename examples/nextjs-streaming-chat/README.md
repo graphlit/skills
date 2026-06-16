@@ -28,7 +28,7 @@ If you do not already have a Graphlit project:
 
 1. Go to [Graphlit Studio](https://www.graphlit.dev) and create a free account.
 2. Create your organization.
-3. Create your first project.
+3. Create your first project. No credit card is required, and the project starts with 100 free credits of usage.
 4. Open Graphlit Studio and select that project in the sidebar so its project card is visible.
 5. Choose the target environment tab, usually `Preview` or `Production`.
 6. Click the copy button for `Copy Environment Variables`.

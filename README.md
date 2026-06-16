@@ -4,7 +4,7 @@ Build grounded chat, synced knowledge bases, and graph-aware applications with G
 
 Graphlit is the context layer for AI applications and agents. This repo gives developers and coding agents the canonical Graphlit path: ingest or sync content, wait for processing, retrieve explicit evidence, and stream grounded answers with `streamAgent()`.
 
-[Use the Skill](skills/graphlit/SKILL.md) · [Run the Example](examples/nextjs-streaming-chat) · [Read the Docs](https://docs.graphlit.dev) · [Open Graphlit Studio](https://www.graphlit.dev)
+[Install the Skills](#install-the-skills) · [Use the Graphlit Skill](skills/graphlit/SKILL.md) · [Run the Example](examples/nextjs-streaming-chat) · [Read the Docs](https://docs.graphlit.dev) · [Open Graphlit Studio](https://www.graphlit.dev)
 
 ## Why This Repo Exists
 
@@ -14,6 +14,7 @@ This repo provides:
 
 - a reusable `graphlit` skill that routes the agent to the right Graphlit references
 - a reusable `durable-cli` skill that teaches coding agents how to install, authenticate, connect source accounts, manage synced data sources, and operate Durable Agents from the terminal
+- a reusable `graphlit-agent-tools` skill for wiring `@graphlit/agent-tools` into tool-calling agents
 - a minimal Next.js example that proves the modern Graphlit app shape
 - task-specific implementation guides for ingestion, retrieval, collections, feeds, specifications, and knowledge graph workflows
 
@@ -44,6 +45,10 @@ The reusable Graphlit skill and its task-specific references. Start with [SKILL.
 
 The reusable Durable CLI skill and its walkthrough references. Start with [SKILL.md](skills/durable-cli/SKILL.md) when the goal is to install, authenticate, connect source accounts, manage data sources, script, or operate Durable Agents from a terminal using the current command surface.
 
+### `skills/graphlit-agent-tools/`
+
+The reusable Graphlit Agent Tools skill for adding `@graphlit/agent-tools` factories to tool-calling frameworks. Start with [SKILL.md](skills/graphlit-agent-tools/SKILL.md) when the goal is to expose Graphlit retrieval, resource reading, mutation, enrichment, or media generation tools to an agent.
+
 ### `examples/nextjs-streaming-chat/`
 
 The canonical sample app for this repo. It shows:
@@ -56,10 +61,41 @@ The canonical sample app for this repo. It shows:
 
 ## Get Started
 
+### Install the Skills
+
+Use the `skills` CLI through `npx` to install these skills into your agent environment:
+
+```bash
+npx skills add graphlit/skills
+```
+
+That installs the available skills from this repository into the current project for the detected agent. To see what is available before installing:
+
+```bash
+npx skills add graphlit/skills --list
+```
+
+Install a single skill when you only need one workflow:
+
+```bash
+npx skills add graphlit/skills --skill graphlit
+npx skills add graphlit/skills --skill durable-cli
+npx skills add graphlit/skills --skill graphlit-agent-tools
+```
+
+Useful install options:
+
+- `--agent <agent-name>` installs to a specific agent.
+- `--agent '*'` installs to every supported local agent.
+- `--global` installs at the user level instead of the current project.
+- `--all` installs every skill for every supported agent and skips prompts.
+
+After installation, ask your agent to use `$graphlit`, `$durable-cli`, or `$graphlit-agent-tools` when you want it to follow the corresponding Graphlit workflow.
+
 ### New to Graphlit?
 
 1. Open [Graphlit Studio](https://www.graphlit.dev).
-2. Create your account, organization, and first project.
+2. Create your account, organization, and first project. No credit card is required, and the project starts with 100 free credits of usage.
 3. Select that project so its project card is visible.
 4. Choose the target environment tab, usually `Preview` or `Production`.
 5. Click `Copy Environment Variables`.
