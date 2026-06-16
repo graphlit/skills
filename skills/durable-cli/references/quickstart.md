@@ -64,14 +64,21 @@ By default, the CLI opens a browser. If the terminal cannot open one, use `--no-
 
 For GitHub, the browser handoff may include installing or updating the Durable GitHub App. Treat that as the normal path for private repository access: Durable can only enumerate and read repositories that the app installation grants.
 
-`web` and several direct-auth sources do not require an account. `web` is the simplest example:
+`web`, `rss`, and several direct-auth sources do not require an account. These are the simplest examples:
 
 ```bash
 durable sources create web \
-  --name "Docs Web" \
-  --url "https://example.com/docs"
+  --name "OpenAI Changelog" \
+  --url "https://developers.openai.com/api/docs/changelog" \
+  --schedule 1day
+
+durable sources create rss \
+  --name "OpenAI News" \
+  --url "https://openai.com/news/rss.xml" \
+  --schedule 1day
 
 durable sources list --provider web
+durable sources list --provider rss
 ```
 
 Provider-backed sources use an account plus a type-specific resource flag:
