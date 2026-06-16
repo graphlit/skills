@@ -58,6 +58,10 @@ durable runs cancel
 
 Important:
 
+- use `durable agents create` to create the agent object and persist core behavior
+- include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...` on `agents create` when the background behavior is known up front
+- scheduled, heartbeat, triggered, and channel-bound agents do not need `durable agents start` to become active after they are configured and enabled
+- use `durable agents start` for an immediate manual run of an existing agent
 - use positional prompt text, `--file`, or stdin for `durable agents start` and `durable runs prompt`
 - use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` for canonical agent mutation
 - use `durable agents set <agent> schedule.cron "0 7 * * 1-5"` and `durable agents set <agent> schedule.timezone America/Los_Angeles` for scheduled agents
@@ -65,7 +69,7 @@ Important:
 - use `durable agents set <agent> trigger.kinds text page` for content-triggered agents
 - use `durable agents update --state enabled|disabled` for explicit lifecycle toggles
 - treat `durable agents update ...` as an older compatibility surface for simple field edits and create-time automation flags
-- use `durable agents start --wait --timeout <duration>` and `durable runs prompt --wait --timeout <duration>` for scripted run control
+- use `durable agents start --wait --timeout <duration>` and `durable runs prompt --wait --timeout <duration>` for scripted run control, not as setup steps for background agents
 
 Property mutation examples:
 
@@ -245,6 +249,7 @@ Important:
 - use `durable connectors ...` for MCP servers
 - use `durable channels endpoints --query ...` to narrow bindable destinations
 - use `durable channels bind --type ...` or `unbind --type ...` only when the endpoint type needs an explicit override
+- use `durable channels email create` without `--username` for the default generated AgentMail address; requested usernames are global under `durableagents.ai` and may return a collision
 
 ## Output Modes
 

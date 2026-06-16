@@ -62,7 +62,7 @@ Load the reference that matches the developer task:
 | **Persona** | Instructional behavior that can be attached to an agent. |
 | **Skill** | Reusable agent instructions managed through `durable skills ...`. |
 | **Agent** | The Durable object that owns execution behavior, model choice, persona attachment, and optional automation such as scheduled, heartbeat, or content-triggered operation. |
-| **Run** | A Durable agent run or session started through `durable agents start`. Interactive runs can be prompted again through `durable runs prompt`, and both surfaces support `--wait` plus `--timeout` for scripted control. |
+| **Run** | One execution of an agent. `durable agents start` creates an immediate manual run for an existing agent; scheduled, heartbeat, triggered, and channel-bound agents can also create runs from their stored automation or incoming events. Interactive runs can be prompted again through `durable runs prompt`, and both manual surfaces support `--wait` plus `--timeout` for scripted control. |
 | **Library** | Graphlit content objects managed through `durable library ...`. Use Graphlit labels, collections, sources, kinds, and mentions for organization and filtering. |
 | **Source account** | A reusable external account connection such as GitHub, Google, Microsoft, Slack, or Notion, managed through `durable accounts ...`. |
 | **Data source** | A synced external source managed through `durable sources ...`. Some data sources use a source account, while others are accountless or direct-auth sources such as `web`, `amazon-s3`, `azure-blob`, `discord`, `productlane-*`, `trello`, `asana`, `fireflies`, and `fathom`. |
@@ -70,6 +70,7 @@ Load the reference that matches the developer task:
 | **MCP connector** | An external MCP server connection managed through the top-level `durable connectors ...` group. |
 | **Channel provider** | A BYO messaging or chat integration such as Slack, Teams, Discord, Telegram, Google Chat, or WhatsApp, managed through `durable channels ...`. |
 | **Endpoint** | A discovered bindable destination under a configured channel provider. |
+| **Email inbox** | A Durable-hosted AgentMail inbox created with `durable channels email create`. Omit `--username` to let Durable allocate an address; requested usernames live in one global `durableagents.ai` namespace and can collide. |
 
 ## Quick Decision Guide
 
@@ -84,16 +85,19 @@ Load the reference that matches the developer task:
 4. If the workflow needs synced external content, either connect a source account with `durable accounts connect` or create a direct-auth/accountless source with `durable sources create ...`.
 5. Use `durable sources discover` when the provider resource is not obvious and the CLI needs to resolve repos, channels, calendars, folders, or databases.
 6. Create a persona if the agent needs explicit instructions.
-7. Create an agent.
+7. Create an agent with its core behavior. For background agents, include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...` plus `--prompt ...` at create time when you already know the automation.
 8. Load context with `durable library ingest`, `durable library upload`, or `durable sources create`.
-9. Start a run with `durable agents start`.
-10. For follow-up turns on an interactive run, use `durable runs prompt`.
-11. Use `durable --json` when another tool or script needs machine-readable output.
+9. Bind channels with `durable channels bind` when the agent should receive or deliver work through Slack, email, messaging, or another provider.
+10. Use `durable agents start` only when you want an immediate manual run of an existing agent. It is not required to activate scheduled, heartbeat, triggered, or channel-bound behavior.
+11. For follow-up turns on an interactive run, use `durable runs prompt`.
+12. Use `durable --json` when another tool or script needs machine-readable output.
 
 ## Agent Behavior
 
 - Prefer the exact current Durable CLI syntax documented here and confirm details with `--help` when needed.
-- Start new interactive runs with `durable agents start`.
+- Treat `durable agents create` as the object and automation setup command. Create-time flags such as `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, and `--mode triggered --kind ... --source ...` persist background behavior on the agent.
+- Treat `durable agents start` as a manual run command for an already-created agent. It does not arm schedules, enable triggers, or make a background agent active.
+- Start new interactive or on-demand runs with `durable agents start`.
 - For autonomous agents, provide instructions at create time with `durable agents create --prompt ...`, or update instructions later with `durable agents set <agent> prompt ...` and `durable agents set <agent> prompt --file <path>`.
 - Create scheduled agents with `--mode scheduled --cron ... --timezone ...`.
 - Create heartbeat agents with `--mode heartbeat --every ... --timezone ...`.
@@ -104,6 +108,7 @@ Load the reference that matches the developer task:
 - Use `durable library ingest` for URL or text input and `durable library upload` for local files. Attach Graphlit labels and existing collections with repeatable `--label` and `--collection`.
 - Use `durable sources discover ...` before create when the user does not already know the exact repo, channel, calendar, folder, or database identifier.
 - Use `durable channels create ...`, `durable channels list`, and `durable channels delete` for channel providers.
+- Use `durable channels email create` without `--username` unless the workflow truly needs a vanity address. If a username is requested, treat it as globally unique under `durableagents.ai` and handle collisions.
 - Reserve top-level `durable connectors ...` for MCP connectors, not channel providers.
 - Treat `durable fs ls`, `cat`, `grep`, `sgrep`, `find`, and `stat` as intentional shell-style wrappers over derived `/library` paths. Direct content ID inspection uses `durable library inspect <content-id>`.
 - Use `--json` whenever the workflow needs to capture IDs or parse structured output.
@@ -112,6 +117,7 @@ Load the reference that matches the developer task:
 - Use Durable source names or GUIDs for `--source`; the CLI resolves names to source IDs before sending the API request.
 - Use `durable agents set <agent> mode interactive` when disabling content-triggered, scheduled, heartbeat, or webhook activation.
 - Use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` as the canonical mutation grammar. `durable agents update ...` remains an older compatibility surface.
+- Use `--wait` and `--timeout` for scripts, tests, and operator workflows that need bounded blocking. Avoid them in marketing or setup examples unless the point is explicitly to demonstrate run-control behavior.
 
 ## Rules
 

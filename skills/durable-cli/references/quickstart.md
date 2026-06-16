@@ -160,14 +160,17 @@ same create surface with explicit schedule, heartbeat, or content-trigger flags:
 ```bash
 durable agents create \
   --name "Daily Briefing" \
+  --mode scheduled \
   --cron "0 9 * * 1-5" \
-  --timezone America/Los_Angeles
+  --timezone America/Los_Angeles \
+  --prompt "Prepare a weekday briefing from the latest Library context."
 
 durable agents create \
   --name "Inbox Watcher" \
   --mode heartbeat \
   --every 15m \
-  --timezone America/Los_Angeles
+  --timezone America/Los_Angeles \
+  --prompt "Watch for new inbox content, draft routine replies, and flag anything that needs review."
 
 durable agents create \
   --name "Content Triage" \
@@ -215,7 +218,9 @@ durable fs ls /library/kind
 
 ## 7. Run an Agent
 
-Start a run against the created agent:
+Start a manual run against the created interactive agent. This is for
+on-demand work; it is not required to activate scheduled, heartbeat, triggered,
+or channel-bound agents.
 
 ```bash
 durable agents start "$AGENT_ID" \
@@ -291,9 +296,9 @@ Other BYO chat providers follow the same `durable channels create <provider>` pa
 Durable-hosted email and messaging setup live under the same `channels` group:
 
 ```bash
-durable channels email create --username support
-durable channels email messages list support@durableagents.ai
-durable channels email messages send support@durableagents.ai \
+durable channels email create
+durable channels email messages list <email-address>
+durable channels email messages send <email-address> \
   --to user@example.com \
   --subject "Hello" \
   --text "READY"
@@ -302,6 +307,9 @@ durable channels messaging status
 durable channels messaging phones register --phone +15555550123
 durable channels messaging phones list
 ```
+
+Pass `--username` only when the workflow needs a vanity address. Usernames are
+global under `durableagents.ai`, so a requested name can already be taken.
 
 ## 10. Configure MCP Connectors
 
