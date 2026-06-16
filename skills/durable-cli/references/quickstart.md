@@ -25,6 +25,16 @@ durable --version
 durable --help
 ```
 
+If the global install fails with `EACCES` because npm is trying to write under
+`/usr` or another root-owned prefix, use a user-level prefix instead of `sudo`:
+
+```bash
+npm config set prefix "$HOME/.local"
+npm install -g @graphlit/durable-agents
+```
+
+Verify `"$HOME/.local/bin"` is on `PATH`, then rerun `durable --version`.
+
 ## 2. Prerequisites
 
 Before using the CLI, the developer needs:
@@ -342,6 +352,18 @@ durable connectors list
 - `durable channels create slack` or another provider create command stores a channel configuration
 
 ## Common First-Run Issues
+
+### `npm install -g @graphlit/durable-agents` fails with `EACCES`
+
+Usually means npm's global prefix is root-owned, commonly `/usr` or
+`/usr/local`. Prefer a user-level prefix:
+
+```bash
+npm config set prefix "$HOME/.local"
+npm install -g @graphlit/durable-agents
+```
+
+Then verify `"$HOME/.local/bin"` is on `PATH` and retry `durable --version`.
 
 ### `durable status` says the CLI is not authenticated
 

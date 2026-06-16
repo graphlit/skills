@@ -1,7 +1,6 @@
 ---
 name: durable-cli
 description: Use this skill when the user wants to install, authenticate, connect source accounts, manage data sources, script, or operate Durable Agents from the terminal with the Durable CLI, including automated agents, runs, library content, VFS commands, channels, and MCP connectors.
-version: "1.0.0"
 ---
 
 # Durable CLI
@@ -21,6 +20,15 @@ durable --help
 ```
 
 The executable is `durable`. The npm package is `@graphlit/durable-agents`.
+
+If `npm install -g` fails with `EACCES` because the global npm prefix is root-owned, do not use `sudo`. Prefer a user-level prefix:
+
+```bash
+npm config set prefix "$HOME/.local"
+npm install -g @graphlit/durable-agents
+```
+
+Verify `"$HOME/.local/bin"` is on `PATH`; if it is not, add it to the user's shell profile before retrying `durable --version`.
 
 ## First Commands
 
