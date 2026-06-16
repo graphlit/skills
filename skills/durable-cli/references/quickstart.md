@@ -231,7 +231,9 @@ Browse or search the Library:
 
 ```bash
 durable library list --label docs
+durable library list --date-mode added --in-last 7d
 durable library search docs --label docs
+durable fs ls /library/contents
 durable fs find /library/labels/docs
 durable fs ls /library/kind
 ```
@@ -275,8 +277,9 @@ Durable exposes a shell-style read-only VFS for Library content under the `durab
 
 ```bash
 durable fs ls /library
+durable fs ls /library/contents --long
 durable fs ls /library/labels/docs --long
-durable fs find /library --kind markdown --long
+durable fs find /library/kind/markdown --date-mode authored --in-last 30d --long
 durable fs grep docs /library/labels/docs
 durable fs sgrep "semantic topic" /library/labels/docs
 durable fs cat /library/<content-id>
@@ -346,7 +349,7 @@ durable connectors list
 - `durable accounts connect` or `durable sources create web` succeeds when the workflow needs synced external content
 - GitHub account setup includes the app installation/update needed for selected private repositories
 - the persona and agent are created successfully
-- Library content appears through both `durable library list` and `durable fs ls /library`
+- Library content appears through both `durable library list` and `durable fs ls /library/contents`
 - `durable agents prompt` streams a usable response
 - `durable runs prompt` can add a follow-up turn to an interactive run
 - `durable channels create slack` or another provider create command stores a channel configuration

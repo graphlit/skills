@@ -148,7 +148,8 @@ Important:
 
 - keep `durable library ...` for content management
 - use `durable library inspect <content-id>` for Markdown-formatted full content inspection by content ID
-- use `durable fs ...` for reading the `/library` filesystem view by VFS path
+- use `durable fs ...` for reading the `/library` filesystem view by VFS path; `/library` is the navigation root and `/library/contents` is the flat all-content listing
+- use `--in-last <duration>` with `--date-mode added|authored` on Library and VFS listing/search commands when filtering by date added or date authored
 - use `durable fs grep` for keyword/lexical Graphlit content search
 - use `durable fs sgrep` for semantic/hybrid Graphlit content search
 

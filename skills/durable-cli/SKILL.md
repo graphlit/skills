@@ -131,11 +131,11 @@ Load the reference that matches the developer task:
 
 - Use `durable accounts ...` for source-account OAuth and `durable sources ...` for data-source management.
 - Use `durable connectors ...` only for MCP connector management.
-- Treat `durable fs ...` commands as reads against Graphlit content through derived paths: `/library`, `/library/<content-id>`, `/library/labels/<label-ref>`, `/library/collections/<collection-ref>`, `/library/kind/<kind>`, `/library/mentions/<mention-kind>/<mention-ref>`, and `/library/sources/<source-ref>`.
+- Treat `durable fs ...` commands as reads against Graphlit content through derived paths: `/library` for navigation, `/library/contents` for all content, `/library/<content-id>` for canonical item paths, `/library/contents/<content-id>` for item paths under the flat content view, `/library/labels/<label-ref>`, `/library/collections/<collection-ref>`, `/library/kind/<kind>`, `/library/mentions/<mention-kind>/<mention-ref>`, and `/library/sources/<source-ref>`.
 - Use `durable fs grep` for keyword/lexical Graphlit content search and `durable fs sgrep` for semantic/hybrid Graphlit content search.
 - Use `durable fs stat <path>` for VFS path metadata and `durable library inspect <content-id>` for Markdown-formatted full content inspection by content ID.
 - For Library ingest, use exactly one of `--url` or `--text`.
-- For Library filters, prefer repeatable `--kind`, `--collection`, and `--mention <kind>:<ref>`. `kind` resolves as Graphlit content type first, then file type, then exact file extension/format aliases such as `pdf`; there is no separate `--format` flag.
+- For Library filters, prefer repeatable `--kind`, `--collection`, and `--mention <kind>:<ref>`. Use `--in-last <duration>` with `--date-mode added|authored` for date added/date authored windows. `kind` resolves as Graphlit content type first, then file type, then exact file extension/format aliases such as `pdf`; there is no separate `--format` flag.
 - Supported mention lookup namespaces are `email` and `phone`; entity mention kinds include `person`, `organization`, `place`, `product`, `repo`, `software`, `event`, `category`, `emotion`, `investment`, `investment-fund`, and the medical entity kinds.
 - Use GUIDs captured from `--json` output for object-specific automation when precision matters.
 - If a workflow spans auth, source setup, agent creation, Library ingest, and execution, load both references before writing commands.
