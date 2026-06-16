@@ -62,7 +62,7 @@ Load the reference that matches the developer task:
 | **Persona** | Instructional behavior that can be attached to an agent. |
 | **Skill** | Reusable agent instructions managed through `durable skills ...`. |
 | **Agent** | The Durable object that owns execution behavior, model choice, persona attachment, and optional automation such as scheduled, heartbeat, or content-triggered operation. |
-| **Run** | One execution of an agent. `durable agents start` creates an immediate manual run for an existing agent; scheduled, heartbeat, triggered, and channel-bound agents can also create runs from their stored automation or incoming events. Interactive runs can be prompted again through `durable runs prompt`, and both manual surfaces support `--wait` plus `--timeout` for scripted control. |
+| **Run** | One execution of an agent. `durable agents prompt` creates a new run for an existing interactive agent. Scheduled, heartbeat, triggered, webhook, and channel-bound agents create runs from their configured automation or incoming events. Interactive runs can be prompted again through `durable runs prompt`, and both prompt surfaces support `--wait` plus `--timeout` for scripted control. |
 | **Library** | Graphlit content objects managed through `durable library ...`. Use Graphlit labels, collections, sources, kinds, and mentions for organization and filtering. |
 | **Source account** | A reusable external account connection such as GitHub, Google, Microsoft, Slack, or Notion, managed through `durable accounts ...`. |
 | **Data source** | A synced external source managed through `durable sources ...`. Some data sources use a source account, while others are accountless or direct-auth sources such as `web`, `amazon-s3`, `azure-blob`, `discord`, `productlane-*`, `trello`, `asana`, `fireflies`, and `fathom`. |
@@ -85,10 +85,10 @@ Load the reference that matches the developer task:
 4. If the workflow needs synced external content, either connect a source account with `durable accounts connect` or create a direct-auth/accountless source with `durable sources create ...`.
 5. Use `durable sources discover` when the provider resource is not obvious and the CLI needs to resolve repos, channels, calendars, folders, or databases.
 6. Create a persona if the agent needs explicit instructions.
-7. Create an agent with its core behavior. For background agents, include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...` plus `--prompt ...` at create time when you already know the automation.
+7. Create an agent with its core behavior. Interactive agents default to promptless chat agents. For automation agents, include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...`; Durable supplies a generic execution prompt when one is omitted, and `--prompt ...`/`--prompt-file ...` overrides it when you already know the automation.
 8. Load context with `durable library ingest`, `durable library upload`, or `durable sources create`.
 9. Bind channels with `durable channels bind` when the agent should receive or deliver work through Slack, email, messaging, or another provider.
-10. Use `durable agents start` only when you want an immediate manual run of an existing agent. It is not required to activate scheduled, heartbeat, triggered, or channel-bound behavior.
+10. Use `durable agents prompt` for the first user turn on an interactive agent. This creates a new run.
 11. For follow-up turns on an interactive run, use `durable runs prompt`.
 12. Use `durable --json` when another tool or script needs machine-readable output.
 
@@ -96,12 +96,12 @@ Load the reference that matches the developer task:
 
 - Prefer the exact current Durable CLI syntax documented here and confirm details with `--help` when needed.
 - Treat `durable agents create` as the object and automation setup command. Create-time flags such as `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, and `--mode triggered --kind ... --source ...` persist background behavior on the agent.
-- Treat `durable agents start` as a manual run command for an already-created agent. It does not arm schedules, enable triggers, or make a background agent active.
-- Start new interactive or on-demand runs with `durable agents start`.
-- For autonomous agents, provide instructions at create time with `durable agents create --prompt ...`, or update instructions later with `durable agents set <agent> prompt ...` and `durable agents set <agent> prompt --file <path>`.
+- Treat `durable agents prompt` as the first-turn command for an already-created interactive agent. It creates a new run.
+- Use `durable runs prompt` for follow-up turns on an existing interactive run.
+- For autonomous agents, Durable defaults the execution prompt at create time when omitted. Provide better instructions with `durable agents create --prompt ...`, or update instructions later with `durable agents set <agent> prompt ...` and `durable agents set <agent> prompt --file <path>`.
 - Create scheduled agents with `--mode scheduled --cron ... --timezone ...`.
 - Create heartbeat agents with `--mode heartbeat --every ... --timezone ...`.
-- Create content-triggered agents with `--mode triggered --prompt ...`, optionally filtered by repeatable `--kind <kind>` and `--source <source>`.
+- Create content-triggered agents with `--mode triggered`, optionally filtered by repeatable `--kind <kind>` and `--source <source>`, and optionally override the default prompt with `--prompt ...`.
 - Use `durable accounts connect` and `durable accounts reconnect` for source-account OAuth, not `durable connectors connect` unless the task is specifically about MCP.
 - For GitHub source accounts, expect the browser handoff to authorize the GitHub account and install or update the app so Durable can enumerate and read selected private repositories.
 - Use `durable sources create web --url ...` for the simplest accountless sync, `durable sources create <type> --account ...` for account-backed sync, and direct-auth flags such as `--api-key`, `--bucket`, or `--token` for sources that authenticate directly.

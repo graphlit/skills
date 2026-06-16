@@ -179,6 +179,9 @@ durable agents create \
   --kind email
 ```
 
+Automation agents receive a generic execution prompt when `--prompt` is omitted.
+Use `--prompt` or `--prompt-file` when you want a specific job definition.
+
 ## 6. Add Library Content
 
 Use `ingest` for URL or text input:
@@ -216,14 +219,14 @@ durable fs find /library/labels/docs
 durable fs ls /library/kind
 ```
 
-## 7. Run an Agent
+## 7. Prompt an Interactive Agent
 
-Start a manual run against the created interactive agent. This is for
-on-demand work; it is not required to activate scheduled, heartbeat, triggered,
-or channel-bound agents.
+Send the first user turn to the created interactive agent. This creates a new
+run. Scheduled, heartbeat, triggered, webhook, and channel-bound agents run from
+their configured activation instead of a first-turn prompt.
 
 ```bash
-durable agents start "$AGENT_ID" \
+durable agents prompt "$AGENT_ID" \
   "Summarize the sprint notes and the README."
 ```
 
@@ -242,7 +245,7 @@ For scripts that need bounded synchronous behavior, use `--wait` and
 `--timeout`:
 
 ```bash
-durable agents start "$AGENT_ID" \
+durable agents prompt "$AGENT_ID" \
   --no-stream \
   --wait \
   --timeout 30s \
@@ -327,7 +330,7 @@ durable connectors list
 - GitHub account setup includes the app installation/update needed for selected private repositories
 - the persona and agent are created successfully
 - Library content appears through both `durable library list` and `durable fs ls /library`
-- `durable agents start` streams a usable response
+- `durable agents prompt` streams a usable response
 - `durable runs prompt` can add a follow-up turn to an interactive run
 - `durable channels create slack` or another provider create command stores a channel configuration
 

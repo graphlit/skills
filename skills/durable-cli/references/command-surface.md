@@ -41,7 +41,7 @@ durable agents create
 durable agents get
 durable agents set
 durable agents clear
-durable agents start
+durable agents prompt
 durable agents update
 durable agents delete
 
@@ -59,17 +59,20 @@ durable runs cancel
 Important:
 
 - use `durable agents create` to create the agent object and persist core behavior
+- omit `--mode` for a promptless interactive chat agent, or set `--mode interactive` explicitly
 - include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...` on `agents create` when the background behavior is known up front
-- scheduled, heartbeat, triggered, and channel-bound agents do not need `durable agents start` to become active after they are configured and enabled
-- use `durable agents start` for an immediate manual run of an existing agent
-- use positional prompt text, `--file`, or stdin for `durable agents start` and `durable runs prompt`
+- automation agents receive a generic execution prompt when created without `--prompt`; pass `--prompt` or `--prompt-file` when you want specific behavior
+- scheduled, heartbeat, triggered, webhook, and channel-bound agents run from their configured activation; do not manually kick them off with the CLI
+- use `durable agents prompt` for the first user turn on an interactive agent, which creates a new run
+- use `durable runs prompt` for follow-up turns on an existing interactive run
+- use positional prompt text, `--file`, or stdin for `durable agents prompt` and `durable runs prompt`
 - use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` for canonical agent mutation
 - use `durable agents set <agent> schedule.cron "0 7 * * 1-5"` and `durable agents set <agent> schedule.timezone America/Los_Angeles` for scheduled agents
 - use `durable agents set <agent> heartbeat.frequency_minutes 30` for heartbeat agents
 - use `durable agents set <agent> trigger.kinds text page` for content-triggered agents
 - use `durable agents update --state enabled|disabled` for explicit lifecycle toggles
 - treat `durable agents update ...` as an older compatibility surface for simple field edits and create-time automation flags
-- use `durable agents start --wait --timeout <duration>` and `durable runs prompt --wait --timeout <duration>` for scripted run control, not as setup steps for background agents
+- use `durable agents prompt --wait --timeout <duration>` and `durable runs prompt --wait --timeout <duration>` for scripted run control
 
 Property mutation examples:
 
@@ -275,7 +278,7 @@ When command details matter, prefer the live help output before producing automa
 
 ```bash
 durable --help
-durable agents start --help
+durable agents prompt --help
 durable runs prompt --help
 durable sources create --help
 durable channels bind --help
