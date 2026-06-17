@@ -233,6 +233,7 @@ Browse or search the Library:
 durable library list --label docs
 durable library list --date-mode added --in-last 7d
 durable library search docs --label docs
+durable library view <content-id>
 durable fs ls /library/contents
 durable fs find /library/labels/docs
 durable fs ls /library/kind
@@ -254,9 +255,13 @@ The command streams by default. For follow-up inspection:
 ```bash
 durable runs list --agent "$AGENT_ID"
 durable runs get <run-id>
+durable runs view <run-id>
+durable runs view <run-id> --transcript
 durable runs watch <run-id>
 durable runs prompt <run-id> "Now turn that into three action items."
 ```
+
+Use `durable runs view <run-id> --no-browser` or `durable library view <content-id> --no-browser` when a coding agent should print the Durable web UI deeplink without trying to open a browser.
 
 If prompt text is omitted, both commands also accept stdin.
 
@@ -351,6 +356,7 @@ durable connectors list
 - the persona and agent are created successfully
 - Library content appears through both `durable library list` and `durable fs ls /library/contents`
 - `durable agents prompt` streams a usable response
+- `durable runs view <run-id> --no-browser` prints a Durable web UI run deeplink
 - `durable runs prompt` can add a follow-up turn to an interactive run
 - `durable channels create slack` or another provider create command stores a channel configuration
 

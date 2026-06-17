@@ -98,7 +98,8 @@ Load the reference that matches the developer task:
 9. Bind channels with `durable channels bind` when the agent should receive or deliver work through Slack, email, messaging, or another provider.
 10. Use `durable agents prompt` for the first user turn on an interactive agent. This creates a new run.
 11. For follow-up turns on an interactive run, use `durable runs prompt`.
-12. Use `durable --json` when another tool or script needs machine-readable output.
+12. Use `durable runs view <run-id>` to open the run flow in the Durable web UI, or `durable runs view <run-id> --transcript` for the transcript. Use `--no-browser` when a coding agent or script should print the deeplink instead of launching a browser.
+13. Use `durable --json` when another tool or script needs machine-readable output.
 
 ## Agent Behavior
 
@@ -106,6 +107,7 @@ Load the reference that matches the developer task:
 - Treat `durable agents create` as the object and automation setup command. Create-time flags such as `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, and `--mode triggered --kind ... --source ...` persist background behavior on the agent.
 - Treat `durable agents prompt` as the first-turn command for an already-created interactive agent. It creates a new run.
 - Use `durable runs prompt` for follow-up turns on an existing interactive run.
+- Use `durable runs view <run-id>` to open a run flow deeplink, and `durable runs view <run-id> --transcript` for transcript view. Use `--no-browser` when a coding agent or script should print the URL.
 - For autonomous agents, Durable defaults the execution prompt at create time when omitted. Provide better instructions with `durable agents create --prompt ...`, or update instructions later with `durable agents set <agent> prompt ...` and `durable agents set <agent> prompt --file <path>`.
 - Create scheduled agents with `--mode scheduled --cron ... --timezone ...`.
 - Create heartbeat agents with `--mode heartbeat --every ... --timezone ...`.
@@ -114,6 +116,7 @@ Load the reference that matches the developer task:
 - For GitHub source accounts, expect the browser handoff to authorize the GitHub account and install or update the app so Durable can enumerate and read selected private repositories.
 - Use `durable sources create web --url ...` for the simplest accountless sync, `durable sources create <type> --account ...` for account-backed sync, and direct-auth flags such as `--api-key`, `--bucket`, or `--token` for sources that authenticate directly.
 - Use `durable library ingest` for URL or text input and `durable library upload` for local files. Attach Graphlit labels and existing collections with repeatable `--label` and `--collection`.
+- Use `durable library view <content-id>` to open the content viewer deeplink, or `--no-browser` to print the URL.
 - Use `durable sources discover ...` before create when the user does not already know the exact repo, channel, calendar, folder, or database identifier.
 - Use `durable channels create ...`, `durable channels list`, and `durable channels delete` for channel providers.
 - Use `durable channels email create` without `--username` unless the workflow truly needs a vanity address. If a username is requested, treat it as globally unique under `durableagents.ai` and handle collisions.
@@ -134,6 +137,7 @@ Load the reference that matches the developer task:
 - Treat `durable fs ...` commands as reads against Graphlit content through derived paths: `/library` for navigation, `/library/contents` for all content, `/library/<content-id>` for canonical item paths, `/library/contents/<content-id>` for item paths under the flat content view, `/library/labels/<label-ref>`, `/library/collections/<collection-ref>`, `/library/kind/<kind>`, `/library/mentions/<mention-kind>/<mention-ref>`, and `/library/sources/<source-ref>`.
 - Use `durable fs grep` for keyword/lexical Graphlit content search and `durable fs sgrep` for semantic/hybrid Graphlit content search.
 - Use `durable fs stat <path>` for VFS path metadata and `durable library inspect <content-id>` for Markdown-formatted full content inspection by content ID.
+- Use `durable library view <content-id>` for the browser content viewer; keep `durable library inspect <content-id>` for terminal Markdown inspection.
 - For Library ingest, use exactly one of `--url` or `--text`.
 - For Library filters, prefer repeatable `--kind`, `--collection`, and `--mention <kind>:<ref>`. Use `--in-last <duration>` with `--date-mode added|authored` for date added/date authored windows. `kind` resolves as Graphlit content type first, then file type, then exact file extension/format aliases such as `pdf`; there is no separate `--format` flag.
 - Supported mention lookup namespaces are `email` and `phone`; entity mention kinds include `person`, `organization`, `place`, `product`, `repo`, `software`, `event`, `category`, `emotion`, `investment`, `investment-fund`, and the medical entity kinds.

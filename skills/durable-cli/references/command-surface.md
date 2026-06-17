@@ -47,6 +47,7 @@ durable agents delete
 
 durable runs list
 durable runs get
+durable runs view
 durable runs prompt
 durable runs events
 durable runs watch
@@ -65,6 +66,8 @@ Important:
 - scheduled, heartbeat, triggered, webhook, and channel-bound agents run from their configured activation; do not manually kick them off with the CLI
 - use `durable agents prompt` for the first user turn on an interactive agent, which creates a new run
 - use `durable runs prompt` for follow-up turns on an existing interactive run
+- use `durable runs view <run-id>` to open the Durable web UI flow deeplink, or `durable runs view <run-id> --transcript` for transcript view
+- use `durable runs view <run-id> --no-browser` when a script or coding agent should print the deeplink instead of launching a browser
 - use positional prompt text, `--file`, or stdin for `durable agents prompt` and `durable runs prompt`
 - use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` for canonical agent mutation
 - use `durable agents set <agent> schedule.cron "0 7 * * 1-5"` and `durable agents set <agent> schedule.timezone America/Los_Angeles` for scheduled agents
@@ -126,6 +129,7 @@ durable library ingest
 durable library upload
 durable library get
 durable library inspect
+durable library view
 durable library update
 durable library delete
 durable library search
@@ -148,6 +152,7 @@ Important:
 
 - keep `durable library ...` for content management
 - use `durable library inspect <content-id>` for Markdown-formatted full content inspection by content ID
+- use `durable library view <content-id>` to open the browser content viewer deeplink, or add `--no-browser` to print the URL
 - use `durable fs ...` for reading the `/library` filesystem view by VFS path; `/library` is the navigation root and `/library/contents` is the flat all-content listing
 - use `--in-last <duration>` with `--date-mode added|authored` on Library and VFS listing/search commands when filtering by date added or date authored
 - use `durable fs grep` for keyword/lexical Graphlit content search
