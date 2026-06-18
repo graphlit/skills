@@ -91,7 +91,7 @@ Load the reference that matches the developer task:
 2. Authenticate with `durable login`.
 3. Confirm the active account with `durable whoami` and `durable status`.
 4. If the workflow needs synced external content, either connect a source account with `durable accounts connect` or create a direct-auth/accountless source with `durable sources create ...`.
-5. Use `durable sources discover` when the provider resource is not obvious and the CLI needs to resolve repos, channels, calendars, folders, or databases.
+5. Use `durable sources discover` when the provider resource is not obvious and the CLI needs to resolve repos, channels, calendars, folders, or databases. For GitHub sources, discovery is helpful for browsing but source creation can use `--repo owner/repo` or `--repo https://github.com/owner/repo` directly when the repository is already known.
 6. Create a persona if the agent needs explicit instructions.
 7. Create an agent with its core behavior. Interactive agents default to promptless chat agents. For automation agents, include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...`; Durable supplies a generic execution prompt when one is omitted, and `--prompt ...`/`--prompt-file ...` overrides it when you already know the automation.
 8. Load context with `durable library ingest`, `durable library upload`, or `durable sources create`.
@@ -113,11 +113,12 @@ Load the reference that matches the developer task:
 - Create heartbeat agents with `--mode heartbeat --every ... --timezone ...`.
 - Create content-triggered agents with `--mode triggered`, optionally filtered by repeatable `--kind <kind>` and `--source <source>`, and optionally override the default prompt with `--prompt ...`.
 - Use `durable accounts connect` and `durable accounts reconnect` for source-account OAuth, not `durable connectors connect` unless the task is specifically about MCP.
-- For GitHub source accounts, expect the browser handoff to authorize the GitHub account and install or update the app so Durable can enumerate and read selected private repositories.
+- For GitHub source accounts, expect the browser handoff to authorize the GitHub account and install or update the app so Durable can enumerate and read selected private repositories. `durable accounts get`, `accounts connect`, and `accounts reconnect` may show `github_app_installation` details; if installation metadata is unavailable, manage selected repository access in GitHub settings and create sources directly with `--repo`.
 - Use `durable sources create web --url ...` for the simplest accountless sync, `durable sources create <type> --account ...` for account-backed sync, and direct-auth flags such as `--api-key`, `--bucket`, or `--token` for sources that authenticate directly.
 - Use `durable library ingest` for URL or text input and `durable library upload` for local files. Attach Graphlit labels and existing collections with repeatable `--label` and `--collection`.
 - Use `durable library view <content-id>` to open the content viewer deeplink, or `--no-browser` to print the URL.
-- Use `durable sources discover ...` before create when the user does not already know the exact repo, channel, calendar, folder, or database identifier.
+- Use `durable sources discover ...` before create when the user does not already know the exact repo, channel, calendar, folder, or database identifier, but do not make GitHub source creation depend on discovery. GitHub sources can be created directly with `--repo owner/repo` or `--repo https://github.com/owner/repo`.
+- If `durable sources sync <source>` reports that the source is paused, resume it first with `durable sources resume <source>`, then retry `durable sources sync <source>`.
 - Use `durable channels create ...`, `durable channels list`, and `durable channels delete` for channel providers.
 - Use `durable channels email create` without `--username` unless the workflow truly needs a vanity address. If a username is requested, treat it as globally unique under `durableagents.ai` and handle collisions.
 - Reserve top-level `durable connectors ...` for MCP connectors, not channel providers.

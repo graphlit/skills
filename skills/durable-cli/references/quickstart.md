@@ -74,6 +74,14 @@ By default, the CLI opens a browser. If the terminal cannot open one, use `--no-
 
 For GitHub, the browser handoff may include installing or updating the Durable GitHub App. Treat that as the normal path for private repository access: Durable can only enumerate and read repositories that the app installation grants.
 
+After connecting GitHub, inspect the account when troubleshooting private repository access:
+
+```bash
+durable accounts get <github-account>
+```
+
+The output may include `github_app_installation` details. If those fields are unavailable or incomplete, GitHub settings remain the source of truth for which repositories the app can access.
+
 `web`, `rss`, and several direct-auth sources do not require an account. These are the simplest examples:
 
 ```bash
@@ -96,8 +104,10 @@ Provider-backed sources use an account plus a type-specific resource flag:
 ```bash
 durable sources create github-issues \
   --account <account-email-or-id> \
-  --repo https://github.com/owner/repo
+  --repo owner/repo
 ```
+
+`--repo https://github.com/owner/repo` is also valid. Use discovery to browse GitHub repositories, but do not require discovery before creation when the repo owner/name or URL is already known.
 
 Direct-auth sources pass provider credentials inline instead of using `durable accounts ...`:
 
@@ -124,6 +134,13 @@ After discovery, create the exact repository-backed source type you need:
 durable sources create github-code \
   --account <account-email-or-id> \
   --repo owner/repo
+```
+
+If a manual sync reports that a data source is paused, resume it before retrying:
+
+```bash
+durable sources resume <source>
+durable sources sync <source>
 ```
 
 ## 5. Create a Persona and Agent
@@ -405,7 +422,7 @@ Usually means:
 
 - the source account was not connected first
 - the type-specific resource flag such as `--repo`, `--channel`, `--calendar`, `--drive`, `--folder`, `--database`, or `--page` was missing
-- the supplied resource name did not resolve and should be discovered first with `durable sources discover`
+- the supplied resource name did not resolve and should be discovered first with `durable sources discover`; for GitHub, pass `--repo owner/repo` or the full GitHub URL directly when the repository is already known
 
 ### `durable library upload` fails on a file
 
