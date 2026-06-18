@@ -133,6 +133,7 @@ durable library view
 durable library update
 durable library delete
 durable library search
+durable library wait
 ```
 
 ### VFS shell affordances
@@ -154,7 +155,9 @@ Important:
 - use `durable library inspect <content-id>` for Markdown-formatted full content inspection by content ID
 - use `durable library view <content-id>` to open the browser content viewer deeplink, or add `--no-browser` to print the URL
 - use `durable fs ...` for reading the `/library` filesystem view by VFS path; `/library` is the navigation root and `/library/contents` is the flat all-content listing
+- use repeatable `--source`, `--kind`, `--label`, `--collection`, and `--mention <kind>:<ref>` filters on Library list/search/wait commands when narrowing content
 - use `--in-last <duration>` with `--date-mode added|authored` on Library and VFS listing/search commands when filtering by date added or date authored
+- use `durable library wait --source <source> [--kind <kind>] [--query <query>] --timeout <duration>` when a script needs to block until async source-ingested content is visible through Library before prompting an agent
 - use `durable fs grep` for keyword/lexical Graphlit content search
 - use `durable fs sgrep` for semantic/hybrid Graphlit content search
 
@@ -202,11 +205,14 @@ Important:
 
 - `durable sources create web --url ...` is the simplest accountless path for web sync
 - account-backed sources use `--account` plus a type-specific flag such as `--repo`, `--channel`, `--calendar`, `--drive`, `--folder`, `--database`, or `--page`
+- history-capable account-backed source creation prepares both concrete data source records automatically: the historical import source and the new-data monitoring sidecar
 - direct-auth sources pass provider credentials inline, for example `--bucket` plus `--access-key` for `amazon-s3`, `--api-key` for `fireflies`, or `--token` for `discord`
 - for GitHub-backed source types, `--repo owner/repo` and `--repo https://github.com/owner/repo` are both valid; prefer `owner/repo` in concise runbooks and use the full URL when copying from a browser
 - use `durable sources discover ...` when the user needs help browsing provider resources before create, but do not depend on GitHub discovery for source creation; if the repo is known, create directly with `--repo`
 - if `durable sources sync <source>` says the source is paused, run `durable sources resume <source>` and then retry `durable sources sync <source>`
+- after creating or syncing an async source in a script, use `durable library wait --source <source> [--kind <kind>] [--query <query>] --timeout <duration>` as the readiness gate instead of hand-rolled sleeps
 - keep `accounts` and `sources` separate mentally: accounts authenticate access, sources define what Durable syncs
+- list/get/update/delete operate on the concrete source records after creation, so the import source and monitoring sidecar can still be managed separately when needed
 
 ## MCP Connectors vs Channel Providers
 

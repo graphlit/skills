@@ -107,7 +107,19 @@ durable sources create github-issues \
   --repo owner/repo
 ```
 
+For history-capable providers, one create prepares both the historical import source and the new-data monitoring sidecar. `durable sources list` shows the concrete source records after creation so they can still be managed separately.
+
 `--repo https://github.com/owner/repo` is also valid. Use discovery to browse GitHub repositories, but do not require discovery before creation when the repo owner/name or URL is already known.
+
+When a script or demo needs source-ingested content before the next agent prompt, wait on the user-visible Library predicate:
+
+```bash
+durable library wait \
+  --source "Northwind GitHub Issues" \
+  --kind issue \
+  --query "Northwind" \
+  --timeout 10m
+```
 
 Direct-auth sources pass provider credentials inline instead of using `durable accounts ...`:
 
@@ -249,7 +261,9 @@ Browse or search the Library:
 ```bash
 durable library list --label docs
 durable library list --date-mode added --in-last 7d
+durable library list --source "Work Calendar" --kind event
 durable library search docs --label docs
+durable library search "planning" --source "Work Gmail"
 durable library view <content-id>
 durable fs ls /library/contents
 durable fs find /library/labels/docs
@@ -372,6 +386,7 @@ durable connectors list
 - GitHub account setup includes the app installation/update needed for selected private repositories
 - the persona and agent are created successfully
 - Library content appears through both `durable library list` and `durable fs ls /library/contents`
+- source-ingested content can be gated with `durable library wait` before an agent prompt needs it
 - `durable agents prompt` streams a usable response
 - `durable runs view <run-id> --no-browser` prints a Durable web UI run deeplink
 - `durable runs prompt` can add a follow-up turn to an interactive run
@@ -430,6 +445,14 @@ Usually means:
 
 - the file path does not exist
 - the file extension does not map to a supported MIME type
+
+### `durable library wait` times out
+
+Usually means:
+
+- async source ingestion has not produced matching content yet
+- the `--source`, `--kind`, `--query`, label, collection, mention, or date filter is too narrow
+- the connected account or source cannot access the expected provider resource
 
 ### VFS commands read Durable Library content
 
