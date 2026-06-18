@@ -178,7 +178,7 @@ Important:
 
 - `durable accounts connect` opens a browser by default and can print the authorization URL with `--no-browser`
 - the browser completes the provider OAuth flow and then returns the user to the terminal
-- GitHub account connection may include a GitHub App install/update step; that app installation controls which private repositories Durable can enumerate and read
+- GitHub account connection opens GitHub authorization plus the Durable Agents GitHub App install/configure flow; that app installation controls which private and organization repositories Durable can enumerate and read
 - `durable accounts connect github`, `durable accounts reconnect <github-account>`, and `durable accounts get <github-account>` may print `github_app_installation` fields; use them to confirm whether Durable saw the GitHub App installation metadata, but treat GitHub settings as the authority for selected repository access
 - use `durable accounts ...`, not `durable connectors ...`, for GitHub, Google, Microsoft, Slack, Notion, and other source accounts
 

@@ -72,7 +72,7 @@ durable accounts list
 
 By default, the CLI opens a browser. If the terminal cannot open one, use `--no-browser` to print the authorization URL, finish the provider flow in the browser, then return to the terminal and verify the account through `durable accounts list` or `durable accounts get`.
 
-For GitHub, the browser handoff may include installing or updating the Durable GitHub App. Treat that as the normal path for private repository access: Durable can only enumerate and read repositories that the app installation grants.
+For GitHub, the browser handoff includes GitHub authorization plus installing or configuring the Durable Agents GitHub App. Treat that as the normal path for private repository access: Durable can only enumerate and read repositories that the app installation grants.
 
 After connecting GitHub, inspect the account when troubleshooting private repository access:
 
