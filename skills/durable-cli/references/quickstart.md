@@ -225,6 +225,22 @@ durable agents create \
   --kind email
 ```
 
+To convert an existing interactive agent into a scheduled agent, use the
+intent-level schedule command so the prompt and cron are stored together:
+
+```bash
+durable agents schedule "$AGENT_ID" \
+  --cron "0 9 * * 1-5" \
+  --timezone America/Los_Angeles \
+  --prompt "Prepare a weekday briefing from the latest Library context."
+
+durable agents schedule "$AGENT_ID" \
+  --cron "0 9 * * 1-5" \
+  --prompt-file ./agent-prompt.md
+
+durable agents unschedule "$AGENT_ID"
+```
+
 Automation agents receive a generic execution prompt when `--prompt` is omitted.
 Use `--prompt` or `--prompt-file` when you want a specific job definition.
 

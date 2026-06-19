@@ -93,7 +93,7 @@ Load the reference that matches the developer task:
 4. If the workflow needs synced external content, either connect a source account with `durable accounts connect` or create a direct-auth/accountless source with `durable sources create ...`.
 5. Use `durable sources discover` when the provider resource is not obvious and the CLI needs to resolve repos, channels, calendars, folders, or databases. For GitHub sources, discovery is helpful for browsing but source creation can use `--repo owner/repo` or `--repo https://github.com/owner/repo` directly when the repository is already known.
 6. Create a persona if the agent needs explicit instructions.
-7. Create an agent with its core behavior. Interactive agents default to promptless chat agents. For automation agents, include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...`; Durable supplies a generic execution prompt when one is omitted, and `--prompt ...`/`--prompt-file ...` overrides it when you already know the automation.
+7. Create an agent with its core behavior. Interactive agents default to promptless chat agents. For automation agents known at create time, include `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, or `--mode triggered ...`; Durable supplies a generic execution prompt when one is omitted, and `--prompt ...`/`--prompt-file ...` overrides it when you already know the automation. To convert an existing interactive agent into a scheduled agent, use `durable agents schedule <agent> --cron ... --prompt ...` or `--prompt-file ...`.
 8. Load context with `durable library ingest`, `durable library upload`, or `durable sources create`. After async source creation, use `durable library wait` when the next scripted step must wait for matching Library content.
 9. Bind channels with `durable channels bind` when the agent should receive or deliver work through Slack, email, messaging, or another provider.
 10. Use `durable agents prompt` for the first user turn on an interactive agent. This creates a new run.
@@ -110,6 +110,7 @@ Load the reference that matches the developer task:
 - Use `durable runs view <run-id>` to open a run flow deeplink, and `durable runs view <run-id> --transcript` for transcript view. Use `--no-browser` when a coding agent or script should print the URL.
 - For autonomous agents, Durable defaults the execution prompt at create time when omitted. Provide better instructions with `durable agents create --prompt ...`, or update instructions later with `durable agents set <agent> prompt ...` and `durable agents set <agent> prompt --file <path>`.
 - Create scheduled agents with `--mode scheduled --cron ... --timezone ...`.
+- Convert an existing interactive agent into a scheduled agent with `durable agents schedule <agent> --cron "0 7 * * 1-5" --timezone America/Los_Angeles --prompt "..."` or `--prompt-file ./prompt.md`. Use `durable agents unschedule <agent>` to return it to promptless interactive mode.
 - Create heartbeat agents with `--mode heartbeat --every ... --timezone ...`.
 - Create content-triggered agents with `--mode triggered`, optionally filtered by repeatable `--kind <kind>` and `--source <source>`, and optionally override the default prompt with `--prompt ...`.
 - Use `durable accounts connect` and `durable accounts reconnect` for source-account OAuth, not `durable connectors connect` unless the task is specifically about MCP.
@@ -128,8 +129,8 @@ Load the reference that matches the developer task:
 - Use `--every` for heartbeat cadence; do not use the deprecated heartbeat-specific cadence flag.
 - For triggered agents, use repeatable `--kind` for content/file kinds and repeatable `--source` for Durable data sources. Omit both to trigger on all finished content.
 - Use Durable source names or GUIDs for `--source`; the CLI resolves names to source IDs before sending the API request.
-- Use `durable agents set <agent> mode interactive` when disabling content-triggered, scheduled, heartbeat, or webhook activation.
-- Use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` as the canonical mutation grammar. `durable agents update ...` remains an older compatibility surface.
+- Use `durable agents unschedule <agent>` when disabling scheduled activation. Use `durable agents set <agent> mode interactive` when disabling content-triggered, heartbeat, or webhook activation.
+- Use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` as the lower-level mutation grammar. `durable agents update ...` remains an older compatibility surface.
 - Use `--wait` and `--timeout` for scripts, tests, and operator workflows that need bounded blocking. Avoid them in marketing or setup examples unless the point is explicitly to demonstrate run-control behavior.
 
 ## Rules
@@ -147,6 +148,21 @@ Load the reference that matches the developer task:
 - If a workflow spans auth, source setup, agent creation, Library ingest, and execution, load both references before writing commands.
 
 ## Agent Property Grammar
+
+Prefer the intent-level helpers for common automation changes:
+
+```bash
+durable agents schedule <agent> \
+  --cron "0 7 * * 1-5" \
+  --timezone America/Los_Angeles \
+  --prompt "Run the daily account sweep."
+
+durable agents schedule <agent> \
+  --cron "0 7 * * 1-5" \
+  --prompt-file ./prompt.md
+
+durable agents unschedule <agent>
+```
 
 Use the regular property grammar for agent edits:
 

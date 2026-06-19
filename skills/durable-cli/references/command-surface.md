@@ -69,8 +69,10 @@ Important:
 - use `durable runs view <run-id>` to open the Durable web UI flow deeplink, or `durable runs view <run-id> --transcript` for transcript view
 - use `durable runs view <run-id> --no-browser` when a script or coding agent should print the deeplink instead of launching a browser
 - use positional prompt text, `--file`, or stdin for `durable agents prompt` and `durable runs prompt`
-- use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` for canonical agent mutation
-- use `durable agents set <agent> schedule.cron "0 7 * * 1-5"` and `durable agents set <agent> schedule.timezone America/Los_Angeles` for scheduled agents
+- use `durable agents schedule <agent> --cron "0 7 * * 1-5" --timezone America/Los_Angeles --prompt "..."` or `--prompt-file ./prompt.md` to convert an existing interactive agent into a scheduled agent
+- use `durable agents unschedule <agent>` to return a scheduled agent to promptless interactive mode
+- use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` for lower-level agent mutation
+- use `durable agents set <agent> schedule.cron "0 7 * * 1-5"` and `durable agents set <agent> schedule.timezone America/Los_Angeles` only when you intentionally need property-level scheduled-agent edits
 - use `durable agents set <agent> heartbeat.frequency_minutes 30` for heartbeat agents
 - use `durable agents set <agent> trigger.kinds text page` for content-triggered agents
 - use `durable agents update --state enabled|disabled` for explicit lifecycle toggles
