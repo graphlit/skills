@@ -174,14 +174,18 @@ Use `durable accounts ...` for external account OAuth state:
 ```bash
 durable accounts list
 durable accounts connect <provider>
+durable accounts connect google --enable read,write
 durable accounts get <account>
 durable accounts reconnect <account>
+durable accounts reconnect <account> --enable read,write
 durable accounts delete <account>
 ```
 
 Important:
 
 - `durable accounts connect` opens a browser by default and can print the authorization URL with `--no-browser`
+- account connection defaults to read access; use `--enable read` for explicit read-only access and `--enable read,write` for read plus action/write scopes
+- do not use a standalone `write` access set, raw provider scopes, or a `--write` flag
 - the browser completes the provider OAuth flow and then returns the user to the terminal
 - GitHub account connection opens GitHub authorization plus the Durable Agents GitHub App install/configure flow; that app installation controls which private and organization repositories Durable can enumerate and read
 - `durable accounts connect github`, `durable accounts reconnect <github-account>`, and `durable accounts get <github-account>` may print `github_app_installation` fields; use them to confirm whether Durable saw the GitHub App installation metadata, but treat GitHub settings as the authority for selected repository access

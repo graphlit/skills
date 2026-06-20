@@ -67,10 +67,14 @@ External source accounts use a browser handoff similar to `durable login`.
 
 ```bash
 durable accounts connect github
+durable accounts connect google --enable read
+durable accounts connect google --enable read,write
 durable accounts list
 ```
 
 By default, the CLI opens a browser. If the terminal cannot open one, use `--no-browser` to print the authorization URL, finish the provider flow in the browser, then return to the terminal and verify the account through `durable accounts list` or `durable accounts get`.
+
+Account connection defaults to read access. Use `--enable read` for explicit read-only access and `--enable read,write` when the account must support action/write tools such as sending mail, creating calendar events, or writing documents. Do not use a standalone `write` access set.
 
 For GitHub, the browser handoff includes GitHub authorization plus installing or configuring the Durable Agents GitHub App. Treat that as the normal path for private repository access: Durable can only enumerate and read repositories that the app installation grants.
 
