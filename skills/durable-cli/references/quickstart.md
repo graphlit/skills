@@ -309,10 +309,13 @@ durable runs get <run-id>
 durable runs view <run-id>
 durable runs view <run-id> --transcript
 durable runs watch <run-id>
+durable runs events <run-id> --summary
 durable runs prompt <run-id> "Now turn that into three action items."
 ```
 
 Use `durable runs view <run-id> --no-browser` or `durable library view <content-id> --no-browser` when a coding agent should print the Durable web UI deeplink without trying to open a browser.
+
+Use `durable runs events <run-id> --summary` when you need a compact tool and execution timeline for debugging or smoke-test review. Use raw `durable runs events <run-id> --cursor <cursor>` only when you need paginated event rows.
 
 If prompt text is omitted, both commands also accept stdin.
 
@@ -348,6 +351,7 @@ Important distinction:
 - `durable library ...` manages Durable content objects
 - `durable library inspect <content-id>` prints a Markdown full-content inspection by content ID
 - `durable fs ls/cat/grep/sgrep/find/stat` reads the virtual filesystem view under `/library`
+- lookup-only mention kind parent paths such as `/library/mentions/email` are invalid; use `/library/mentions/email/<encoded-email>` or `--mention email:<address>`
 
 ## 9. Configure Channels
 

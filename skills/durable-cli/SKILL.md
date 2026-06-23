@@ -99,7 +99,8 @@ Load the reference that matches the developer task:
 10. Use `durable agents prompt` for the first user turn on an interactive agent. This creates a new run.
 11. For follow-up turns on an interactive run, use `durable runs prompt`.
 12. Use `durable runs view <run-id>` to open the run flow in the Durable web UI, or `durable runs view <run-id> --transcript` for the transcript. Use `--no-browser` when a coding agent or script should print the deeplink instead of launching a browser.
-13. Use `durable --json` when another tool or script needs machine-readable output.
+13. Use `durable runs events <run-id> --summary` when an operator needs a compact tool/execution timeline without paging through raw events.
+14. Use `durable --json` when another tool or script needs machine-readable output.
 
 ## Agent Behavior
 
@@ -108,6 +109,7 @@ Load the reference that matches the developer task:
 - Treat `durable agents prompt` as the first-turn command for an already-created interactive agent. It creates a new run.
 - Use `durable runs prompt` for follow-up turns on an existing interactive run.
 - Use `durable runs view <run-id>` to open a run flow deeplink, and `durable runs view <run-id> --transcript` for transcript view. Use `--no-browser` when a coding agent or script should print the URL.
+- Use `durable runs events <run-id> --summary` for a compact, auto-paged tool/execution timeline; `--compact` and `--tools` are aliases.
 - For autonomous agents, Durable defaults the execution prompt at create time when omitted. Provide better instructions with `durable agents create --prompt ...`, or update instructions later with `durable agents set <agent> prompt ...` and `durable agents set <agent> prompt --file <path>`.
 - Create scheduled agents with `--mode scheduled --cron ... --timezone ...`.
 - Convert an existing interactive agent into a scheduled agent with `durable agents schedule <agent> --cron "0 7 * * 1-5" --timezone America/Los_Angeles --prompt "..."` or `--prompt-file ./prompt.md`. Use `durable agents unschedule <agent>` to return it to promptless interactive mode.
@@ -138,12 +140,13 @@ Load the reference that matches the developer task:
 - Use `durable accounts ...` for source-account OAuth and `durable sources ...` for data-source management.
 - Use `durable connectors ...` only for MCP connector management.
 - Treat `durable fs ...` commands as reads against Graphlit content through derived paths: `/library` for navigation, `/library/contents` for all content, `/library/<content-id>` for canonical item paths, `/library/contents/<content-id>` for item paths under the flat content view, `/library/labels/<label-ref>`, `/library/collections/<collection-ref>`, `/library/kind/<kind>`, `/library/mentions/<mention-kind>/<mention-ref>`, and `/library/sources/<source-ref>`.
+- Do not use lookup-only mention kind parent paths such as `/library/mentions/email` or `/library/mentions/phone`; they are invalid commands. Use a concrete value path such as `/library/mentions/email/<encoded-email>`, or use `--mention email:<address>` on Library/VFS filters.
 - Use `durable fs grep` for keyword/lexical Graphlit content search and `durable fs sgrep` for semantic/hybrid Graphlit content search.
 - Use `durable fs stat <path>` for VFS path metadata and `durable library inspect <content-id>` for Markdown-formatted full content inspection by content ID.
 - Use `durable library view <content-id>` for the browser content viewer; keep `durable library inspect <content-id>` for terminal Markdown inspection.
 - For Library ingest, use exactly one of `--url` or `--text`.
 - For Library filters, prefer repeatable `--source`, `--kind`, `--collection`, and `--mention <kind>:<ref>`. Use `--in-last <duration>` with `--date-mode added|authored` for date added/date authored windows. `kind` resolves as Graphlit content type first, then file type, then exact file extension/format aliases such as `pdf`; there is no separate `--format` flag.
-- Supported mention lookup namespaces are `email` and `phone`; entity mention kinds include `person`, `organization`, `place`, `product`, `repo`, `software`, `event`, `category`, `emotion`, `investment`, `investment-fund`, and the medical entity kinds.
+- Supported mention lookup namespaces are `email` and `phone`, but only with a reference value; entity mention kinds include `person`, `organization`, `place`, `product`, `repo`, `software`, `event`, `category`, `emotion`, `investment`, `investment-fund`, and the medical entity kinds.
 - Use GUIDs captured from `--json` output for object-specific automation when precision matters.
 - If a workflow spans auth, source setup, agent creation, Library ingest, and execution, load both references before writing commands.
 

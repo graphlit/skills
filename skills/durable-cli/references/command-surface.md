@@ -78,6 +78,8 @@ Important:
 - use `durable agents update --state enabled|disabled` for explicit lifecycle toggles
 - treat `durable agents update ...` as an older compatibility surface for simple field edits and create-time automation flags
 - use `durable agents prompt --wait --timeout <duration>` and `durable runs prompt --wait --timeout <duration>` for scripted run control
+- use `durable runs events <run-id> --summary` for a compact, auto-paged tool/execution timeline; `--compact` and `--tools` are aliases
+- use raw `durable runs events <run-id> --cursor <cursor> --limit <n>` when you need paginated event rows instead of the operator summary
 
 Property mutation examples:
 
@@ -158,6 +160,7 @@ Important:
 - use `durable library view <content-id>` to open the browser content viewer deeplink, or add `--no-browser` to print the URL
 - use `durable fs ...` for reading the `/library` filesystem view by VFS path; `/library` is the navigation root and `/library/contents` is the flat all-content listing
 - use repeatable `--source`, `--kind`, `--label`, `--collection`, and `--mention <kind>:<ref>` filters on Library list/search/wait commands when narrowing content
+- do not use lookup-only mention kind parent paths such as `/library/mentions/email`; use a concrete value path such as `/library/mentions/email/<encoded-email>` or `--mention email:<address>`
 - use `--in-last <duration>` with `--date-mode added|authored` on Library and VFS listing/search commands when filtering by date added or date authored
 - use `durable library wait --source <source> [--kind <kind>] [--query <query>] --timeout <duration>` when a script needs to block until async source-ingested content is visible through Library before prompting an agent
 - use `durable fs grep` for keyword/lexical Graphlit content search
