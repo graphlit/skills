@@ -305,6 +305,7 @@ The command streams by default. For follow-up inspection:
 
 ```bash
 durable runs list --agent "$AGENT_ID"
+durable runs search "sprint notes" --agent "$AGENT_ID"
 durable runs get <run-id>
 durable runs view <run-id>
 durable runs view <run-id> --transcript
@@ -315,7 +316,9 @@ durable runs prompt <run-id> "Now turn that into three action items."
 
 Use `durable runs view <run-id> --no-browser` or `durable library view <content-id> --no-browser` when a coding agent should print the Durable web UI deeplink without trying to open a browser.
 
-Use `durable runs events <run-id> --summary` when you need a compact tool and execution timeline for debugging or smoke-test review. Use raw `durable runs events <run-id> --cursor <cursor>` only when you need paginated event rows.
+Use `durable runs list` for recent run records, retained for about 30 days after their last update. Use `durable runs search "<query>" --agent <agent>` when you need to rediscover a completed run memory rather than by run ID; completed run memories remain searchable until deleted. Plain output is list-like; use `--json` for structured search results.
+
+Use `durable runs events <run-id> --summary` when you need a compact tool and execution timeline for debugging or smoke-test review while the recent run record is still retained. Use raw `durable runs events <run-id> --cursor <cursor>` only when you need paginated event rows.
 
 If prompt text is omitted, both commands also accept stdin.
 
@@ -412,6 +415,8 @@ durable connectors list
 - Library content appears through both `durable library list` and `durable fs ls /library/contents`
 - source-ingested content can be gated with `durable library wait` before an agent prompt needs it
 - `durable agents prompt` streams a usable response
+- `durable runs list` shows recent run records retained for about 30 days after their last update
+- `durable runs search "<query>" --agent <agent>` can rediscover prior run memories
 - `durable runs view <run-id> --no-browser` prints a Durable web UI run deeplink
 - `durable runs prompt` can add a follow-up turn to an interactive run
 - `durable channels create slack` or another provider create command stores a channel configuration

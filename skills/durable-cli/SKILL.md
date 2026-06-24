@@ -50,6 +50,7 @@ durable sources list
 durable agents list
 durable library list
 durable runs list
+durable runs search "renewal risk"
 ```
 
 ## References
@@ -70,7 +71,7 @@ Load the reference that matches the developer task:
 | **Persona** | Instructional behavior that can be attached to an agent. |
 | **Skill** | Reusable agent instructions managed through `durable skills ...`. |
 | **Agent** | The Durable object that owns execution behavior, model choice, persona attachment, and optional automation such as scheduled, heartbeat, or content-triggered operation. |
-| **Run** | One execution of an agent. `durable agents prompt` creates a new run for an existing interactive agent. Scheduled, heartbeat, triggered, webhook, and channel-bound agents create runs from their configured automation or incoming events. Interactive runs can be prompted again through `durable runs prompt`, and both prompt surfaces support `--wait` plus `--timeout` for scripted control. |
+| **Run** | One execution of an agent. `durable agents prompt` creates a new run for an existing interactive agent. Scheduled, heartbeat, triggered, webhook, and channel-bound agents create runs from their configured automation or incoming events. `durable runs list` shows recent run records for execution state and control, retained for about 30 days after their last update. Use `durable runs search "<query>"` to find completed run memories, which remain searchable until deleted. Interactive runs can be prompted again through `durable runs prompt`, and both prompt surfaces support `--wait` plus `--timeout` for scripted control. |
 | **Library** | Graphlit content objects managed through `durable library ...`. Use Graphlit labels, collections, sources, kinds, and mentions for organization and filtering. |
 | **Source account** | A reusable external account connection such as GitHub, Google, Microsoft, Slack, or Notion, managed through `durable accounts ...`. |
 | **Data source** | A synced external source managed through `durable sources ...`. Some data sources use a source account, while others are accountless or direct-auth sources such as `web`, `amazon-s3`, `azure-blob`, `discord`, `productlane-*`, `trello`, `asana`, `fireflies`, and `fathom`. For history-capable sources, create prepares both the historical import source and the new-data monitoring sidecar. |
@@ -98,15 +99,19 @@ Load the reference that matches the developer task:
 9. Bind channels with `durable channels bind` when the agent should receive or deliver work through Slack, email, messaging, or another provider.
 10. Use `durable agents prompt` for the first user turn on an interactive agent. This creates a new run.
 11. For follow-up turns on an interactive run, use `durable runs prompt`.
-12. Use `durable runs view <run-id>` to open the run flow in the Durable web UI, or `durable runs view <run-id> --transcript` for the transcript. Use `--no-browser` when a coding agent or script should print the deeplink instead of launching a browser.
-13. Use `durable runs events <run-id> --summary` when an operator needs a compact tool/execution timeline without paging through raw events.
-14. Use `durable --json` when another tool or script needs machine-readable output.
+12. Use `durable runs list [--agent <agent>] [--status <status>]` for recent run records used by execution state and run-control workflows; these records are retained for about 30 days after their last update.
+13. Use `durable runs search "<query>" --agent <agent>` to find completed run memories by semantic/hybrid search when the run ID is not already known. Completed run memories remain searchable until deleted. The default text output is list-like: run ID, relevance, agent, creation time, title, and summary.
+14. Use `durable runs view <run-id>` to open the run flow in the Durable web UI, or `durable runs view <run-id> --transcript` for the transcript. Use `--no-browser` when a coding agent or script should print the deeplink instead of launching a browser.
+15. Use `durable runs events <run-id> --summary` when an operator needs a compact tool/execution timeline without paging through raw events. Run-control commands require the recent run record to still be retained.
+16. Use `durable --json` when another tool or script needs machine-readable output.
 
 ## Agent Behavior
 
 - Prefer the exact current Durable CLI syntax documented here and confirm details with `--help` when needed.
 - Treat `durable agents create` as the object and automation setup command. Create-time flags such as `--mode scheduled --cron ...`, `--mode heartbeat --every ...`, and `--mode triggered --kind ... --source ...` persist background behavior on the agent.
 - Treat `durable agents prompt` as the first-turn command for an already-created interactive agent. It creates a new run.
+- Use `durable runs list [--agent <agent>] [--status <status>]` for recent run records. These records are retained for about 30 days after their last update and are the window for execution state and run-control commands.
+- Use `durable runs search "<query>" [--agent <agent>] [--search-type hybrid|keyword|vector] [--min-relevance <score>] [--in-last <duration>]` to find completed run memories. These memories remain searchable until deleted; a search result can outlive the recent record needed by run-control commands.
 - Use `durable runs prompt` for follow-up turns on an existing interactive run.
 - Use `durable runs view <run-id>` to open a run flow deeplink, and `durable runs view <run-id> --transcript` for transcript view. Use `--no-browser` when a coding agent or script should print the URL.
 - Use `durable runs events <run-id> --summary` for a compact, auto-paged tool/execution timeline; `--compact` and `--tools` are aliases.

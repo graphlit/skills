@@ -46,6 +46,7 @@ durable agents update
 durable agents delete
 
 durable runs list
+durable runs search
 durable runs get
 durable runs view
 durable runs prompt
@@ -65,6 +66,8 @@ Important:
 - automation agents receive a generic execution prompt when created without `--prompt`; pass `--prompt` or `--prompt-file` when you want specific behavior
 - scheduled, heartbeat, triggered, webhook, and channel-bound agents run from their configured activation; do not manually kick them off with the CLI
 - use `durable agents prompt` for the first user turn on an interactive agent, which creates a new run
+- use `durable runs list [--agent <agent>] [--status <status>]` for recent run records retained for about 30 days after their last update
+- use `durable runs search "<query>" --agent <agent>` to find completed run memories when the run ID is not already known; completed run memories remain searchable until deleted, the text output is list-like, and `--json` returns structured search results
 - use `durable runs prompt` for follow-up turns on an existing interactive run
 - use `durable runs view <run-id>` to open the Durable web UI flow deeplink, or `durable runs view <run-id> --transcript` for transcript view
 - use `durable runs view <run-id> --no-browser` when a script or coding agent should print the deeplink instead of launching a browser
@@ -78,7 +81,8 @@ Important:
 - use `durable agents update --state enabled|disabled` for explicit lifecycle toggles
 - treat `durable agents update ...` as an older compatibility surface for simple field edits and create-time automation flags
 - use `durable agents prompt --wait --timeout <duration>` and `durable runs prompt --wait --timeout <duration>` for scripted run control
-- use `durable runs events <run-id> --summary` for a compact, auto-paged tool/execution timeline; `--compact` and `--tools` are aliases
+- use `durable runs search "<query>" [--search-type hybrid|keyword|vector] [--min-relevance <score>] [--in-last <duration>]` when narrowing run-memory retrieval
+- use `durable runs events <run-id> --summary` for a compact, auto-paged tool/execution timeline while the recent run record is still retained; `--compact` and `--tools` are aliases
 - use raw `durable runs events <run-id> --cursor <cursor> --limit <n>` when you need paginated event rows instead of the operator summary
 
 Property mutation examples:
