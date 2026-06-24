@@ -124,6 +124,7 @@ Load the reference that matches the developer task:
 - Use `durable sources discover ...` before create when the user does not already know the exact repo, channel, calendar, folder, or database identifier, but do not make GitHub source creation depend on discovery. GitHub sources can be created directly with `--repo owner/repo` or `--repo https://github.com/owner/repo`.
 - If `durable sources sync <source>` reports that the source is paused, resume it first with `durable sources resume <source>`, then retry `durable sources sync <source>`.
 - Use `durable channels create ...`, `durable channels list`, and `durable channels delete` for channel providers.
+- For Microsoft Teams channel setup, follow the exact Teams Channel Provider Checklist below before running connector or binding commands.
 - Use `durable channels email create` without `--username` unless the workflow truly needs a vanity address. If a username is requested, treat it as globally unique under `durableagents.ai` and handle collisions.
 - Reserve top-level `durable connectors ...` for MCP connectors, not channel providers.
 - Treat `durable fs ls`, `cat`, `grep`, `sgrep`, `find`, and `stat` as intentional shell-style wrappers over derived `/library` paths. Direct content ID inspection uses `durable library inspect <content-id>`.
@@ -134,6 +135,104 @@ Load the reference that matches the developer task:
 - Use `durable agents unschedule <agent>` when disabling scheduled activation. Use `durable agents set <agent> mode interactive` when disabling content-triggered, heartbeat, or webhook activation.
 - Use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` as the lower-level mutation grammar. `durable agents update ...` remains an older compatibility surface.
 - Use `--wait` and `--timeout` for scripts, tests, and operator workflows that need bounded blocking. Avoid them in marketing or setup examples unless the point is explicitly to demonstrate run-control behavior.
+
+## Teams Channel Provider Checklist
+
+When the user asks to add or bind Microsoft Teams as a Durable channel provider, treat it as a BYO Azure Bot setup. Do not treat it as Microsoft source-account OAuth, and do not use top-level `durable connectors ...`.
+
+Ask this preflight in one message if any answer is missing:
+
+1. What Durable workspace should the CLI be authenticated to?
+2. What display name should Durable use for the Teams channel provider?
+3. What is the Azure Bot Microsoft App ID? This maps to `--bot-id` or `DURABLE_TEAMS_BOT_ID`.
+4. What is the Azure Bot client secret value? This maps to `--bot-password` or `DURABLE_TEAMS_BOT_PASSWORD`; explicitly ask for the secret value, not the secret ID.
+5. What is the Microsoft tenant ID? This maps to `--tenant-id` or `DURABLE_TEAMS_TENANT_ID`.
+6. Has the Azure Bot messaging endpoint been set to the Durable Agents service URL, such as `https://agents.graphlit.dev/api/channels/teams/messages`?
+7. Has the Azure Bot's Microsoft Teams channel been enabled in Azure Bot Channels?
+8. Has the Teams app package been uploaded or published in the Teams tenant?
+9. Has someone sent a message to the installed bot so a Bot Framework conversation endpoint can be captured?
+10. If binding now, what agent should receive Teams messages, and do we have a discovered endpoint from `durable channels endpoints --provider teams` or an opaque `{tenantId}:{conversation.id}` endpoint?
+
+Do not proceed with `durable channels create teams` until the bot ID, client secret value, and tenant ID are available. Do not proceed with `durable channels bind --provider teams` until either endpoint discovery returns the Teams endpoint or the user provides the opaque endpoint.
+
+Teams channel connector creation uses Bot Framework credentials and this token scope:
+
+```text
+https://api.botframework.com/.default
+```
+
+Do not ask for Microsoft Graph delegated scopes such as `ChannelMessage.Send`, `ChannelMessage.Read.All`, `Group.Read.All`, or `Team.ReadBasic.All` unless the user's task is specifically about Microsoft Teams data sources or Microsoft Teams distribution/write tools. Those are different surfaces from inbound Durable channel binding.
+
+Prefer the low-friction setup helper when it exists. It should generate the Teams app package and create the Durable connector in one run when all credentials are supplied:
+
+```bash
+durable channels setup teams \
+  --name "<display name>" \
+  --bot-id "$DURABLE_TEAMS_BOT_ID" \
+  --bot-password "$DURABLE_TEAMS_BOT_PASSWORD" \
+  --tenant-id "$DURABLE_TEAMS_TENANT_ID"
+
+durable channels list
+```
+
+When the user only has the bot ID or wants package-only output, use setup to generate the app ZIP without connector creation if supported:
+
+```bash
+durable channels setup teams
+durable channels setup teams \
+  --name "<display name>" \
+  --bot-id "$DURABLE_TEAMS_BOT_ID" \
+  --output ./teams-app.zip \
+  --no-create
+```
+
+If `durable channels setup teams` is not available in the installed CLI, tell the user that the current fallback is connector creation plus manual package/setup guidance:
+
+```bash
+durable channels create teams \
+  --name "<display name>" \
+  --bot-id "$DURABLE_TEAMS_BOT_ID" \
+  --bot-password "$DURABLE_TEAMS_BOT_PASSWORD" \
+  --tenant-id "$DURABLE_TEAMS_TENANT_ID"
+
+durable channels list
+```
+
+After the installed bot receives a Teams message, discover endpoints:
+
+```bash
+durable channels endpoints --provider teams
+durable channels endpoints --provider teams --query "<team-or-channel-or-tenant>"
+```
+
+Bind by discovered endpoint:
+
+```bash
+durable channels bind \
+  --provider teams \
+  --agent "<agent name or id>" \
+  --endpoint "<tenantId>:<conversation.id>"
+```
+
+If selector support exists, bind by human-readable Teams metadata:
+
+```bash
+durable channels bind \
+  --provider teams \
+  --agent "<agent name or id>" \
+  --team "<team name>" \
+  --channel "<channel name>"
+```
+
+Unbind with the same endpoint:
+
+```bash
+durable channels unbind \
+  --provider teams \
+  --endpoint "<tenantId>:<conversation.id>"
+```
+
+If endpoint discovery is empty, the next action is external: confirm the Azure Bot messaging endpoint, Teams channel enablement, app upload/publish, and that a message has been sent to the bot. Do not invent a Microsoft Graph discovery workaround for inbound Teams channel binding.
 
 ## Rules
 
