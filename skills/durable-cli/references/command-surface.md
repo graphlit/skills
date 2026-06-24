@@ -85,6 +85,14 @@ Important:
 - use `durable runs events <run-id> --summary` for a compact, auto-paged tool/execution timeline while the recent run record is still retained; `--compact` and `--tools` are aliases
 - use raw `durable runs events <run-id> --cursor <cursor> --limit <n>` when you need paginated event rows instead of the operator summary
 
+Relevance thresholds:
+
+- `--min-relevance` applies server-side for `durable runs search`, `durable library search`, and `durable library wait --query`; do not treat it as a client-side cutoff over previously displayed relevance values
+- a displayed top score such as `relevance=1` does not mean that rerunning with `--min-relevance 0.6` must return that result
+- omit `--min-relevance` for exploratory search, then narrow with query text and explicit filters first
+- if thresholded search returns no matches, retry without `--min-relevance` before concluding the item is absent
+- use `--min-relevance` only with `--search-type hybrid` or `--search-type vector`; keyword search rejects it
+
 Property mutation examples:
 
 ```bash
@@ -166,6 +174,7 @@ Important:
 - use repeatable `--source`, `--kind`, `--label`, `--collection`, and `--mention <kind>:<ref>` filters on Library list/search/wait commands when narrowing content
 - do not use lookup-only mention kind parent paths such as `/library/mentions/email`; use a concrete value path such as `/library/mentions/email/<encoded-email>` or `--mention email:<address>`
 - use `--in-last <duration>` with `--date-mode added|authored` on Library and VFS listing/search commands when filtering by date added or date authored
+- use `--min-relevance` cautiously on `durable library search` and `durable library wait --query`; it is a server-side semantic search constraint, not a post-filter over a previous result's displayed relevance score
 - use `durable library wait --source <source> [--kind <kind>] [--query <query>] --timeout <duration>` when a script needs to block until async source-ingested content is visible through Library before prompting an agent
 - use `durable fs grep` for keyword/lexical Graphlit content search
 - use `durable fs sgrep` for semantic/hybrid Graphlit content search

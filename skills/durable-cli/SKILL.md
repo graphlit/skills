@@ -141,6 +141,14 @@ Load the reference that matches the developer task:
 - Use `durable agents set <agent> <property> <value>` and `durable agents clear <agent> <property>` as the lower-level mutation grammar. `durable agents update ...` remains an older compatibility surface.
 - Use `--wait` and `--timeout` for scripts, tests, and operator workflows that need bounded blocking. Avoid them in marketing or setup examples unless the point is explicitly to demonstrate run-control behavior.
 
+## Search Relevance Guidance
+
+- `--min-relevance` is a server-side search constraint for `durable runs search`, `durable library search`, and `durable library wait --query`; it is not a client-side filter over the relevance values printed by a previous unthresholded result set.
+- Do not infer a safe `--min-relevance` cutoff from a displayed top result such as `relevance=1`. The displayed score is useful for ranking within the returned result set, but rerunning with `--min-relevance 0.6` can legitimately return no matches because the threshold changes the server-side search/filtering step.
+- Prefer omitting `--min-relevance` for exploratory search. Narrow first with query text, `--agent`, `--source`, `--kind`, `--label`, `--collection`, `--mention`, `--in-last`, or a VFS path. Add `--min-relevance` only when a workflow intentionally wants to discard borderline semantic matches.
+- If a thresholded search returns no matches, retry the same query without `--min-relevance` before concluding that the content or run memory is missing. If a threshold is still required, raise it gradually from a low value rather than jumping from a displayed score.
+- `--min-relevance` is valid only with `--search-type hybrid` or `--search-type vector`; keyword search rejects it. For `durable fs sgrep`, narrow with the path and filters rather than a relevance threshold.
+
 ## Teams Channel Provider Checklist
 
 When the user asks to add or bind Microsoft Teams as a Durable channel provider, treat it as a BYO Azure Bot setup. Do not treat it as Microsoft source-account OAuth, and do not use top-level `durable connectors ...`.

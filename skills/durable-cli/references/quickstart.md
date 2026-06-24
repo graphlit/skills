@@ -318,6 +318,8 @@ Use `durable runs view <run-id> --no-browser` or `durable library view <content-
 
 Use `durable runs list` for recent run records, retained for about 30 days after their last update. Use `durable runs search "<query>" --agent <agent>` when you need to rediscover a completed run memory rather than by run ID; completed run memories remain searchable until deleted. Plain output is list-like; use `--json` for structured search results.
 
+For `durable runs search`, `durable library search`, and `durable library wait --query`, treat `--min-relevance` as an advanced server-side search constraint. Do not pick a threshold from a previous displayed relevance value; if a thresholded search returns nothing, retry without `--min-relevance` before assuming the run memory or content is missing.
+
 Use `durable runs events <run-id> --summary` when you need a compact tool and execution timeline for debugging or smoke-test review while the recent run record is still retained. Use raw `durable runs events <run-id> --cursor <cursor>` only when you need paginated event rows.
 
 If prompt text is omitted, both commands also accept stdin.
