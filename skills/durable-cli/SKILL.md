@@ -128,8 +128,10 @@ Load the reference that matches the developer task:
 - Use `durable library view <content-id>` to open the content viewer deeplink, or `--no-browser` to print the URL.
 - Use `durable sources discover ...` before create when the user does not already know the exact repo, channel, calendar, folder, or database identifier, but do not make GitHub source creation depend on discovery. GitHub sources can be created directly with `--repo owner/repo` or `--repo https://github.com/owner/repo`.
 - If `durable sources sync <source>` reports that the source is paused, resume it first with `durable sources resume <source>`, then retry `durable sources sync <source>`.
-- Use `durable channels create ...`, `durable channels list`, and `durable channels delete` for channel providers.
+- Use `durable channels setup ...` when a guided channel bootstrap exists. Use `durable channels create ...`, `durable channels list`, and `durable channels delete` for lower-level channel provider management.
 - For Microsoft Teams channel setup, follow the exact Teams Channel Provider Checklist below before running connector or binding commands.
+- For Discord channel setup, follow the exact Discord Channel Provider Checklist below before running connector or binding commands.
+- For WhatsApp channel setup, follow the exact WhatsApp Channel Provider Checklist below before running connector or binding commands.
 - Use `durable channels email create` without `--username` unless the workflow truly needs a vanity address. If a username is requested, treat it as globally unique under `durableagents.ai` and handle collisions.
 - Reserve top-level `durable connectors ...` for MCP connectors, not channel providers.
 - Treat `durable fs ls`, `cat`, `grep`, `sgrep`, `find`, and `stat` as intentional shell-style wrappers over derived `/library` paths. Direct content ID inspection uses `durable library inspect <content-id>`.
@@ -246,6 +248,223 @@ durable channels unbind \
 ```
 
 If endpoint discovery is empty, the next action is external: confirm the Azure Bot messaging endpoint, Teams channel enablement, app upload/publish, and that a message has been sent to the bot. Do not invent a Microsoft Graph discovery workaround for inbound Teams channel binding.
+
+## Discord Channel Provider Checklist
+
+When the user asks to add or bind Discord as a Durable channel provider, treat it as a BYO Discord Application/Bot setup. Do not treat it as Discord source-account OAuth, do not use top-level `durable connectors ...`, and do not ask for Message Content Intent. The Durable Discord channel uses HTTP interactions and slash commands, not the Discord gateway message stream.
+
+Use this KISS sequence for first-run setup:
+
+1. Confirm Durable CLI auth with `durable status` or `durable whoami` when practical. Ask the user only if the CLI is not authenticated or the workspace looks wrong.
+2. Collect the minimum setup inputs: display name, Discord Application ID, Discord Interactions Public Key, and Discord Bot Token. Prefer environment variables for secrets instead of asking the user to paste token values into chat.
+3. Run `durable channels setup discord` with those values. Use `--guild-id` only when the user already has a target guild or the workflow is a smoke test that needs immediate guild-scoped command propagation.
+4. Have the user install the bot from the generated invite URL.
+5. Run endpoint discovery.
+6. Bind the discovered endpoint to the target agent.
+7. Test with `/ask prompt: READY`.
+
+Ask only for missing values at the step where they are needed:
+
+- Setup requires a Durable display name, `--application-id` or `DURABLE_DISCORD_APPLICATION_ID`, `--public-key` or `DURABLE_DISCORD_PUBLIC_KEY`, and `--bot-token` or `DURABLE_DISCORD_BOT_TOKEN`.
+- Guild-scoped setup accepts `--guild-id` or `DURABLE_DISCORD_GUILD_ID`, but omit it for the default global command path.
+- Binding requires the target agent and either a discovered endpoint from `durable channels endpoints --provider discord` or an opaque `{guildId}:{channelId}` endpoint.
+
+Do not proceed with `durable channels create discord` until the Application ID, Interactions Public Key, and Bot Token are available. Do not proceed with `durable channels bind --provider discord` until either endpoint discovery returns the Discord endpoint or the user provides the opaque endpoint.
+
+Default the command name to `ask` and the option name to `prompt`. Do not ask the user to choose command names unless they explicitly need a non-default command.
+
+Prefer the low-friction setup helper when it exists. It should create or update the Durable connector, register or repair the Discord interactions endpoint, register or repair `/ask prompt:<message>`, print the generated invite URL, and print the next endpoint discovery and binding commands:
+
+```bash
+durable channels setup discord \
+  --name "<display name>" \
+  --application-id "$DURABLE_DISCORD_APPLICATION_ID" \
+  --public-key "$DURABLE_DISCORD_PUBLIC_KEY" \
+  --bot-token "$DURABLE_DISCORD_BOT_TOKEN"
+```
+
+For fast smoke tests, register the command in a specific guild so Discord command propagation is immediate:
+
+```bash
+durable channels setup discord \
+  --name "<display name>" \
+  --application-id "$DURABLE_DISCORD_APPLICATION_ID" \
+  --public-key "$DURABLE_DISCORD_PUBLIC_KEY" \
+  --bot-token "$DURABLE_DISCORD_BOT_TOKEN" \
+  --guild-id "$DURABLE_DISCORD_GUILD_ID"
+```
+
+For repair flows, keep setup as the operator command rather than asking the user to hand-edit Discord settings. Do not show these flags in the first-run path. Use `--skip-create` when the Durable connector already exists and setup should only repair Discord-side state, `--skip-command` when command registration should be skipped, and `--force-command` when the command definition should be overwritten:
+
+```bash
+durable channels setup discord \
+  --name "<display name>" \
+  --application-id "$DURABLE_DISCORD_APPLICATION_ID" \
+  --public-key "$DURABLE_DISCORD_PUBLIC_KEY" \
+  --bot-token "$DURABLE_DISCORD_BOT_TOKEN" \
+  --skip-create \
+  --force-command
+```
+
+The supported Discord user command is:
+
+```text
+/ask prompt:<message>
+```
+
+If the user only has the Application ID, setup should still be useful: print the Durable interactions endpoint URL, generated invite URL, missing credentials, and exact next commands. It must not pretend connector creation, endpoint registration, or command registration succeeded until all required credentials are present.
+
+If `durable channels setup discord` is not available in the installed CLI, tell the user that the current fallback is connector creation plus manual Discord setup guidance. Do not call the Discord channel shippable from the fallback alone unless endpoint registration and slash-command registration are already handled elsewhere:
+
+```bash
+durable channels create discord \
+  --name "<display name>" \
+  --application-id "$DURABLE_DISCORD_APPLICATION_ID" \
+  --public-key "$DURABLE_DISCORD_PUBLIC_KEY" \
+  --bot-token "$DURABLE_DISCORD_BOT_TOKEN"
+
+durable channels list
+```
+
+After the bot is installed into a Discord server, discover endpoints:
+
+```bash
+durable channels endpoints --provider discord
+durable channels endpoints --provider discord --query "<server-or-channel-name>"
+```
+
+Bind by discovered endpoint:
+
+```bash
+durable channels bind \
+  --provider discord \
+  --agent "<agent name or id>" \
+  --endpoint "<guildId>:<channelId>"
+```
+
+If selector support exists, bind by human-readable Discord metadata:
+
+```bash
+durable channels bind \
+  --provider discord \
+  --agent "<agent name or id>" \
+  --workspace "<server name>" \
+  --channel "<channel name>"
+```
+
+Unbind with the same endpoint:
+
+```bash
+durable channels unbind \
+  --provider discord \
+  --endpoint "<guildId>:<channelId>"
+```
+
+For a first real test, ask the user to run this in the bound Discord channel:
+
+```text
+/ask prompt: READY
+```
+
+If endpoint discovery is empty, the next action is external: open the generated Discord invite URL, install the bot into the target server, confirm the bot has `View Channels`, `Send Messages`, `Embed Links`, `Attach Files`, `Read Message History`, and `Use Application Commands`, and rerun endpoint discovery. If the command is missing in Discord, rerun the setup helper to repair command registration instead of asking the user to hand-create the command.
+
+## WhatsApp Channel Provider Checklist
+
+When the user asks to add or bind WhatsApp as a Durable channel provider, treat it as a BYO Meta WhatsApp Cloud API setup. Do not treat it as source-account OAuth, do not use top-level `durable connectors ...`, and do not ask for consumer WhatsApp credentials. The Durable WhatsApp channel receives normal inbound messages sent to a WhatsApp Business phone number and replies through the Meta Graph API.
+
+Use this KISS sequence for first-run setup:
+
+1. Confirm Durable CLI auth with `durable status` or `durable whoami` when practical. Ask the user only if the CLI is not authenticated or the workspace looks wrong.
+2. Collect the minimum setup inputs: display name, WhatsApp Phone Number ID, and permanent Meta access token. Prefer environment variables for secrets instead of asking the user to paste token values into chat.
+3. Run `durable channels setup whatsapp`. Let setup generate a verify token when one is not supplied. Include `--app-secret` when the user has it so runtime signature verification can be enabled.
+4. Have the user paste the callback URL and verify token from setup output into Meta's WhatsApp webhook configuration, then subscribe the webhook to the `messages` field.
+5. Run endpoint discovery. The bindable endpoint should be the configured `phoneNumberId`.
+6. Bind the WhatsApp endpoint to the target agent. If there is only one WhatsApp endpoint, prefer the no-endpoint bind.
+7. Test by sending `READY` from WhatsApp to the business phone number.
+
+Ask only for missing values at the step where they are needed:
+
+- Setup requires a Durable display name, `--phone-number-id` or `DURABLE_WHATSAPP_PHONE_NUMBER_ID`, and `--access-token` or `DURABLE_WHATSAPP_ACCESS_TOKEN`.
+- Setup accepts `--verify-token` or `DURABLE_WHATSAPP_VERIFY_TOKEN`; if omitted, setup should generate one and print it for the Meta webhook form.
+- Setup accepts `--app-secret` or `DURABLE_WHATSAPP_APP_SECRET`; strongly prefer it for signed webhook verification, but do not block first-run setup if the user cannot find it yet.
+- Binding requires the target agent. Use `--endpoint` only when endpoint discovery returns multiple WhatsApp endpoints or the user provides an explicit `phoneNumberId`.
+
+Do not proceed with `durable channels create whatsapp` until the access token and Phone Number ID are available. Do not ask the user for a recipient phone number during channel setup; sender phone numbers appear only after users message the WhatsApp Business number.
+
+Prefer the low-friction setup helper when it exists. It should print the webhook callback URL, generate or echo the verify token, validate the access token and Phone Number ID, create or update the Durable connector, make the `phoneNumberId` endpoint discoverable immediately, and print the next endpoint discovery and binding commands:
+
+```bash
+durable channels setup whatsapp \
+  --name "<display name>" \
+  --phone-number-id "$DURABLE_WHATSAPP_PHONE_NUMBER_ID" \
+  --access-token "$DURABLE_WHATSAPP_ACCESS_TOKEN" \
+  --verify-token "$DURABLE_WHATSAPP_VERIFY_TOKEN" \
+  --app-secret "$DURABLE_WHATSAPP_APP_SECRET"
+```
+
+If the verify token is not already chosen, omit it and use the generated value from setup output in Meta:
+
+```bash
+durable channels setup whatsapp \
+  --name "<display name>" \
+  --phone-number-id "$DURABLE_WHATSAPP_PHONE_NUMBER_ID" \
+  --access-token "$DURABLE_WHATSAPP_ACCESS_TOKEN" \
+  --app-secret "$DURABLE_WHATSAPP_APP_SECRET"
+```
+
+After the Meta webhook is verified and subscribed to `messages`, discover endpoints:
+
+```bash
+durable channels endpoints --provider whatsapp
+durable channels endpoints --provider whatsapp --query "$DURABLE_WHATSAPP_PHONE_NUMBER_ID"
+```
+
+Bind the single configured WhatsApp endpoint to an agent:
+
+```bash
+durable channels bind \
+  --provider whatsapp \
+  --agent "<agent name or id>"
+```
+
+If endpoint selection is ambiguous, bind explicitly by Phone Number ID:
+
+```bash
+durable channels bind \
+  --provider whatsapp \
+  --agent "<agent name or id>" \
+  --endpoint "$DURABLE_WHATSAPP_PHONE_NUMBER_ID"
+```
+
+Unbind with the same endpoint:
+
+```bash
+durable channels unbind \
+  --provider whatsapp \
+  --endpoint "$DURABLE_WHATSAPP_PHONE_NUMBER_ID"
+```
+
+For a first real test, ask the user to send this normal WhatsApp message to the configured business number:
+
+```text
+READY
+```
+
+If `durable channels setup whatsapp` is not available in the installed CLI, tell the user that the current fallback is connector creation plus manual Meta webhook setup guidance:
+
+```bash
+durable channels create whatsapp \
+  --name "<display name>" \
+  --phone-number-id "$DURABLE_WHATSAPP_PHONE_NUMBER_ID" \
+  --access-token "$DURABLE_WHATSAPP_ACCESS_TOKEN" \
+  --verify-token "$DURABLE_WHATSAPP_VERIFY_TOKEN" \
+  --app-secret "$DURABLE_WHATSAPP_APP_SECRET"
+
+durable channels endpoints --provider whatsapp
+durable channels bind --provider whatsapp --agent "<agent name or id>"
+```
+
+If endpoint discovery is empty after connector creation, check that the connector was created successfully and that the Phone Number ID was stored. Unlike Teams, WhatsApp does not need a first inbound message to discover the phone-number endpoint in Durable. If inbound test messages do not produce replies, check Meta webhook callback URL, verify token, `messages` field subscription, app secret/signature errors, and the WhatsApp 24-hour customer-service window.
 
 ## Rules
 

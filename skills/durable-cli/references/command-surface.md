@@ -5,6 +5,7 @@ Use this reference when the developer needs the right Durable CLI command family
 ## Current Naming Rules
 
 - `create` is for managed first-class resources
+- `setup` is for provider-specific guided bootstrap flows that generate external setup artifacts, create or repair the Durable channel provider, and print the next commands
 - `ingest` is for URL or text content entering the Library
 - `upload` is for local file transfer into the Library
 - `connect` is for source-account OAuth and MCP connector auth/lifecycle
@@ -260,6 +261,9 @@ Use `durable channels ...` for Slack, Teams, Discord, Telegram, Google Chat, and
 
 ```bash
 durable channels setup slack
+durable channels setup teams
+durable channels setup discord
+durable channels setup whatsapp
 durable channels list
 durable channels create slack
 durable channels create teams
@@ -287,9 +291,17 @@ Important:
 
 - use `durable channels ...` for channel providers
 - use `durable connectors ...` for MCP servers
+- prefer `durable channels setup slack`, `durable channels setup teams`, `durable channels setup discord`, or `durable channels setup whatsapp` when a channel requires external app or bot configuration
 - use `durable channels endpoints --query ...` to narrow bindable destinations
 - use `durable channels bind --type ...` or `unbind --type ...` only when the endpoint type needs an explicit override
 - use `durable channels email create` without `--username` for the default generated AgentMail address; requested usernames are global under `durableagents.ai` and may return a collision
+
+Guided setup helpers should remove external friction where possible:
+
+- Slack setup should generate or update the Slack app manifest flow and print the next install/bind commands
+- Teams setup should generate the Teams app package, create or update the channel connector, and print the next upload/discovery/bind commands
+- Discord setup should create or update the channel connector, register or repair the interactions endpoint and `/ask prompt:<message>` command, generate the install URL, and print the next discovery/bind commands
+- WhatsApp setup should print the Meta webhook callback URL and verify token, create or update the channel connector, expose the `phoneNumberId` endpoint immediately, and print the next discovery/bind/test commands
 
 ## Output Modes
 

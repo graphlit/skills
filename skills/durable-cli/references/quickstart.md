@@ -360,26 +360,66 @@ Important distinction:
 
 ## 9. Configure Channels
 
-Slack currently has the most guided setup flow:
+Use guided setup commands first when the channel provider has external app or bot configuration. They should do as much product-owned setup as possible, then print the exact next commands.
 
 ```bash
 durable channels setup slack
-durable channels create slack \
-  --name "Workspace Slack" \
-  --signing-secret "<signing-secret>" \
-  --bot-token "xoxb-..." \
-  --app-id "<slack-app-id>"
+```
 
+Teams setup uses BYO Azure Bot credentials and should generate the Teams app package in the same flow:
+
+```bash
+durable channels setup teams \
+  --name "Workspace Teams Bot" \
+  --bot-id "$DURABLE_TEAMS_BOT_ID" \
+  --bot-password "$DURABLE_TEAMS_BOT_PASSWORD" \
+  --tenant-id "$DURABLE_TEAMS_TENANT_ID"
+```
+
+Discord setup uses BYO Discord Application/Bot credentials. It should register or repair the interactions endpoint, register or repair `/ask prompt:<message>`, generate the install URL, and print the next discovery/bind commands:
+
+```bash
+durable channels setup discord \
+  --name "Workspace Discord Bot" \
+  --application-id "$DURABLE_DISCORD_APPLICATION_ID" \
+  --public-key "$DURABLE_DISCORD_PUBLIC_KEY" \
+  --bot-token "$DURABLE_DISCORD_BOT_TOKEN"
+```
+
+WhatsApp setup uses BYO Meta WhatsApp Cloud API credentials. It should print the webhook callback URL and verify token, create or repair the connector, expose the Phone Number ID as the endpoint, and print the next discovery/bind/test commands:
+
+```bash
+durable channels setup whatsapp \
+  --name "Workspace WhatsApp Bot" \
+  --phone-number-id "$DURABLE_WHATSAPP_PHONE_NUMBER_ID" \
+  --access-token "$DURABLE_WHATSAPP_ACCESS_TOKEN" \
+  --verify-token "$DURABLE_WHATSAPP_VERIFY_TOKEN" \
+  --app-secret "$DURABLE_WHATSAPP_APP_SECRET"
+```
+
+After the provider is installed into a workspace, team, server, or channel, discover endpoints and bind one to an agent:
+
+```bash
 durable channels list
 durable channels endpoints --provider slack --query ops
+durable channels endpoints --provider teams
+durable channels endpoints --provider discord
+durable channels endpoints --provider whatsapp
 durable channels bind \
   --provider slack \
   --agent "$AGENT_ID" \
   --channel "#ops" \
   --workspace "My Workspace"
+durable channels bind \
+  --provider discord \
+  --agent "$AGENT_ID" \
+  --endpoint "$DURABLE_DISCORD_ENDPOINT"
+durable channels bind \
+  --provider whatsapp \
+  --agent "$AGENT_ID"
 ```
 
-Other BYO chat providers follow the same `durable channels create <provider>` pattern with provider-specific flags.
+Use `durable channels create <provider>` as the lower-level fallback only when the installed CLI does not have a setup helper or the workflow intentionally wants connector creation without guided external setup.
 
 Durable-hosted email and messaging setup live under the same `channels` group:
 
