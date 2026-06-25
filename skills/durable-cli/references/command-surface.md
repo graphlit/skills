@@ -257,7 +257,7 @@ durable connectors delete <connector>
 
 ### Channel providers
 
-Use `durable channels ...` for Slack, Teams, Discord, Telegram, Google Chat, and WhatsApp:
+Use `durable channels ...` for Slack, Teams, Discord, Telegram, Google Chat, WhatsApp, email, messaging phones, and voice:
 
 ```bash
 durable channels setup slack
@@ -285,6 +285,12 @@ durable channels messaging status
 durable channels messaging phones register
 durable channels messaging phones list
 durable channels messaging phones delete
+durable channels voice status
+durable channels voice numbers list
+durable channels voice numbers search
+durable channels voice numbers create
+durable channels voice numbers import
+durable channels voice numbers delete
 ```
 
 Important:
@@ -295,6 +301,11 @@ Important:
 - use `durable channels endpoints --query ...` to narrow bindable destinations
 - use `durable channels bind --type ...` or `unbind --type ...` only when the endpoint type needs an explicit override
 - use `durable channels email create` without `--username` for the default generated AgentMail address; requested usernames are global under `durableagents.ai` and may return a collision
+- use `durable channels voice status` before voice setup to confirm voice is ready for the workspace
+- use `durable channels voice numbers search --country US [--area-code <code>]` to find available Twilio numbers, then `durable channels voice numbers create --phone <E.164-number> [--label <label>]` to add one
+- use `durable channels voice numbers import --phone <E.164-number> --provider-number-id <PN...> [--label <label>]` only for an existing Twilio number; import verifies the number can be used for Durable voice and verifies the provider-number SID matches the phone number
+- bind inbound voice calls with `durable channels bind --provider voice --agent <agent> --phone <E.164-number>`; `--phone` is a voice-only alias for `--endpoint`
+- delete voice numbers with `durable channels voice numbers delete <phone> --yes`; pass `--force` only when deleting a still-bound number, which first removes the voice binding and then releases the number
 
 Guided setup helpers should remove external friction where possible:
 
@@ -302,6 +313,7 @@ Guided setup helpers should remove external friction where possible:
 - Teams setup should generate the Teams app package, create or update the channel connector, and print the next upload/discovery/bind commands
 - Discord setup should create or update the channel connector, register or repair the interactions endpoint and `/ask prompt:<message>` command, generate the install URL, and print the next discovery/bind commands
 - WhatsApp setup should print the Meta webhook callback URL and verify token, create or update the channel connector, expose the `phoneNumberId` endpoint immediately, and print the next discovery/bind/test commands
+- Voice has no `channels setup voice` helper. Use `durable channels voice status`, `durable channels voice numbers search/create/import/list/delete`, `durable channels endpoints --provider voice`, and `durable channels bind --provider voice`.
 
 ## Output Modes
 
@@ -331,4 +343,6 @@ durable agents prompt --help
 durable runs prompt --help
 durable sources create --help
 durable channels bind --help
+durable channels voice status --help
+durable channels voice numbers --help
 ```

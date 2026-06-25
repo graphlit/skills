@@ -397,6 +397,25 @@ durable channels setup whatsapp \
   --app-secret "$DURABLE_WHATSAPP_APP_SECRET"
 ```
 
+Voice setup is the inbound phone-call surface: a user calls a Durable-managed or imported Twilio number and the bound agent answers. Start by checking voice readiness, then add or import a number:
+
+```bash
+durable channels voice status
+durable channels voice numbers search --country US --area-code 415
+durable channels voice numbers create \
+  --phone +14155550123 \
+  --label "Agent phone"
+```
+
+If the number already exists in Twilio, import it with the Twilio provider-number SID. The SID should look like `PN...`; import verifies that the number can be used for Durable voice and that the SID matches the phone number:
+
+```bash
+durable channels voice numbers import \
+  --phone +14155550123 \
+  --provider-number-id PN0123456789abcdef0123456789abcdef \
+  --label "Agent phone"
+```
+
 After the provider is installed into a workspace, team, server, or channel, discover endpoints and bind one to an agent:
 
 ```bash
@@ -405,6 +424,7 @@ durable channels endpoints --provider slack --query ops
 durable channels endpoints --provider teams
 durable channels endpoints --provider discord
 durable channels endpoints --provider whatsapp
+durable channels endpoints --provider voice
 durable channels bind \
   --provider slack \
   --agent "$AGENT_ID" \
@@ -417,7 +437,21 @@ durable channels bind \
 durable channels bind \
   --provider whatsapp \
   --agent "$AGENT_ID"
+durable channels bind \
+  --provider voice \
+  --agent "$AGENT_ID" \
+  --phone +14155550123
 ```
+
+For voice binding, `--phone` is a voice-only alias for `--endpoint`. Delete voice numbers only when you intend to release the number:
+
+```bash
+durable channels unbind --provider voice --phone +14155550123
+durable channels voice numbers delete +14155550123 --yes
+durable channels voice numbers delete +14155550123 --yes --force
+```
+
+Use `--force` only for a still-bound number; it removes the agent's voice binding before releasing the number.
 
 Use `durable channels create <provider>` as the lower-level fallback only when the installed CLI does not have a setup helper or the workflow intentionally wants connector creation without guided external setup.
 
@@ -462,6 +496,7 @@ durable connectors list
 - `durable runs view <run-id> --no-browser` prints a Durable web UI run deeplink
 - `durable runs prompt` can add a follow-up turn to an interactive run
 - `durable channels create slack` or another provider create command stores a channel configuration
+- `durable channels voice numbers list` shows the voice phone number, `durable channels endpoints --provider voice` shows it as bindable, and calling the bound number reaches the agent
 
 ## Common First-Run Issues
 
@@ -535,3 +570,13 @@ Usually means:
 
 - required provider secrets were not passed
 - the provider itself still needs manual app-side setup after the Durable-side configuration step
+
+### Voice number setup fails
+
+Usually means:
+
+- `durable channels voice status` shows voice is not ready for the workspace
+- `durable channels voice numbers create` used a phone number that was not returned by search or is no longer available
+- `durable channels voice numbers import` used the wrong Twilio SID type; it requires a provider-number SID beginning with `PN`
+- the imported provider-number SID does not match the supplied E.164 phone number
+- `durable channels voice numbers delete <phone>` omitted `--yes`, or the number is still bound and needs an explicit unbind or `--force`

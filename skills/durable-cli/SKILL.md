@@ -77,9 +77,10 @@ Load the reference that matches the developer task:
 | **Data source** | A synced external source managed through `durable sources ...`. Some data sources use a source account, while others are accountless or direct-auth sources such as `web`, `amazon-s3`, `azure-blob`, `discord`, `productlane-*`, `trello`, `asana`, `fireflies`, and `fathom`. For history-capable sources, create prepares both the historical import source and the new-data monitoring sidecar. |
 | **Library VFS** | The read-only virtual filesystem mounted at `/library`, exposed through `durable fs ls`, `cat`, `grep`, `sgrep`, `find`, and `stat`. VFS paths are derived from Graphlit content metadata and facets. |
 | **MCP connector** | An external MCP server connection managed through the top-level `durable connectors ...` group. |
-| **Channel provider** | A BYO messaging or chat integration such as Slack, Teams, Discord, Telegram, Google Chat, or WhatsApp, managed through `durable channels ...`. |
+| **Channel provider** | A messaging, chat, email, messaging-phone, or voice integration managed through `durable channels ...`. Provider examples include Slack, Teams, Discord, Telegram, Google Chat, WhatsApp, email, iMessage/messaging, and voice. |
 | **Endpoint** | A discovered bindable destination under a configured channel provider. |
 | **Email inbox** | A Durable-hosted AgentMail inbox created with `durable channels email create`. Omit `--username` to let Durable allocate an address; requested usernames live in one global `durableagents.ai` namespace and can collide. |
+| **Voice number** | A Twilio-backed inbound phone number managed with `durable channels voice numbers ...` and bound to an agent as a `voice` endpoint so a user can call the agent. |
 
 ## Quick Decision Guide
 
@@ -132,7 +133,10 @@ Load the reference that matches the developer task:
 - For Microsoft Teams channel setup, follow the exact Teams Channel Provider Checklist below before running connector or binding commands.
 - For Discord channel setup, follow the exact Discord Channel Provider Checklist below before running connector or binding commands.
 - For WhatsApp channel setup, follow the exact WhatsApp Channel Provider Checklist below before running connector or binding commands.
+- For voice channel setup, follow the exact Voice Channel Checklist below. The current CLI flow is a human calling an agent on an inbound voice number; do not describe outbound agent-initiated calls as supported CLI behavior.
 - Use `durable channels email create` without `--username` unless the workflow truly needs a vanity address. If a username is requested, treat it as globally unique under `durableagents.ai` and handle collisions.
+- Use `durable channels voice status` to check whether voice setup is ready, `durable channels voice numbers search` to find available numbers, `durable channels voice numbers create --phone <number>` to add a managed number, and `durable channels voice numbers import --phone <number> --provider-number-id <PN...>` to bring an existing Twilio number into Durable voice.
+- Bind voice numbers with `durable channels bind --provider voice --agent <agent> --phone <E.164-number>`; `--phone` is only an alias for `--endpoint` when `--provider voice`.
 - Reserve top-level `durable connectors ...` for MCP connectors, not channel providers.
 - Treat `durable fs ls`, `cat`, `grep`, `sgrep`, `find`, and `stat` as intentional shell-style wrappers over derived `/library` paths. Direct content ID inspection uses `durable library inspect <content-id>`.
 - Use `--json` whenever the workflow needs to capture IDs or parse structured output.
@@ -150,6 +154,72 @@ Load the reference that matches the developer task:
 - Prefer omitting `--min-relevance` for exploratory search. Narrow first with query text, `--agent`, `--source`, `--kind`, `--label`, `--collection`, `--mention`, `--in-last`, or a VFS path. Add `--min-relevance` only when a workflow intentionally wants to discard borderline semantic matches.
 - If a thresholded search returns no matches, retry the same query without `--min-relevance` before concluding that the content or run memory is missing. If a threshold is still required, raise it gradually from a low value rather than jumping from a displayed score.
 - `--min-relevance` is valid only with `--search-type hybrid` or `--search-type vector`; keyword search rejects it. For `durable fs sgrep`, narrow with the path and filters rather than a relevance threshold.
+
+## Voice Channel Checklist
+
+When the user asks for Durable voice agent setup, treat the current CLI requirement as inbound calling: "Can I call my agent?" Do not expand the scope to outbound calls from the agent unless the installed API and CLI explicitly add that surface.
+
+Use this KISS sequence for first-run setup:
+
+1. Confirm Durable CLI auth with `durable status` or `durable whoami` when practical.
+2. Check voice setup with `durable channels voice status`. If voice is not ready, finish workspace voice setup before buying, importing, or binding numbers.
+3. Find an available number with `durable channels voice numbers search --country US [--area-code <code>]`.
+4. Purchase the chosen number with `durable channels voice numbers create --phone <E.164-number> --label "<label>"`, or import an existing Twilio number with `durable channels voice numbers import --phone <E.164-number> --provider-number-id <PN...> --label "<label>"`.
+5. Confirm it appears as a bindable endpoint with `durable channels endpoints --provider voice`.
+6. Bind it to an agent with `durable channels bind --provider voice --agent "<agent name or id>" --phone <E.164-number>`.
+7. Test by calling the number from a normal phone.
+
+Managed number search and purchase:
+
+```bash
+durable channels voice status
+durable channels voice numbers search --country US --area-code 415
+durable channels voice numbers create \
+  --phone +14155550123 \
+  --label "Agent phone"
+```
+
+Importing an existing Twilio number requires the Twilio provider-number SID, not an account SID, messaging service SID, or phone number ID. The SID should look like `PN...`. Import verifies that the number can be used for Durable voice, verifies the SID's phone number matches `--phone`, and prepares it for inbound calls:
+
+```bash
+durable channels voice numbers import \
+  --phone +14155550123 \
+  --provider-number-id PN0123456789abcdef0123456789abcdef \
+  --label "Agent phone"
+```
+
+List and bind:
+
+```bash
+durable channels voice numbers list
+durable channels endpoints --provider voice
+durable channels bind \
+  --provider voice \
+  --agent "<agent name or id>" \
+  --phone +14155550123
+```
+
+`--phone` is a voice-only alias for `--endpoint`; these are equivalent for voice:
+
+```bash
+durable channels bind --provider voice --agent "<agent>" --phone +14155550123
+durable channels bind --provider voice --agent "<agent>" --endpoint +14155550123
+```
+
+Unbind and delete:
+
+```bash
+durable channels unbind --provider voice --phone +14155550123
+durable channels voice numbers delete +14155550123 --yes
+```
+
+Deleting a voice number releases the phone number and requires `--yes`. If the number is still bound to an agent, either unbind first or pass `--force`; force-delete removes the voice binding before releasing the number:
+
+```bash
+durable channels voice numbers delete +14155550123 --yes --force
+```
+
+If `durable channels endpoints --provider voice` is empty after number creation or import, check `durable channels voice numbers list` and `durable channels voice status`. If import fails, verify that `--provider-number-id` is the Twilio provider-number SID for the same E.164 phone number.
 
 ## Teams Channel Provider Checklist
 
